@@ -1,0 +1,40 @@
+---
+title: "Assignment3"
+author: "Molly McDade | Ann Gray Perdue | Luke White | John Carl Tagbor"
+format: html
+editor: visual
+---
+
+# AstraSync AI/ML Services Analysis
+
+## Summary
+
+AstraSync offers an AI/ML service contract for 18 months, and is in negotiations about billing. Their first offer had two counteroffers from the client, one being \$152,000/month and the other being \$125,000/month plus an \$800,000 bonus at the end of the contract if implementation is successful (70% chance). If AstraSync does not accept either alternative, the project will be opened to a RFP where different companies will compete for the project. AstraSync is set on bidding \$150,000/month on the project, and estimates a 40% chance they'll win. The terms of the RFP include payments of the revenue bid amount to the winning bidder at the end of each month, plus a gain-share reward at the end of month 18 depending on the amount saved for the client.
+
+## Decision Tree
+
+-   [ ] node square
+
+-   --\> edge, branch
+
+-   \| tag, or text
+
+```{mermaid}
+graph LR
+
+A[ ] --> |Counter-Offer A Contribution| B1[$32k]
+A[ ] --> |Counter-Offer B Contribution| B2[$5k]
+A[ ] --> |RFP| B3[Bid $150k]
+
+B1[$32k] --> |18 Months Discounted| C1[$501,522]
+
+B2[$5k] --> |Unsuccessful 30%| C2[$78k]
+B2[$5k] --> |Successful Bonus 70%| C3[$506,713]
+
+B3[Bid $150k] --> |Lose the Bid 60% Chance| C4( )
+B3[Bid $150k] --> |Win the Bid 40% Chance| C5[Base Earnings = $470,177]
+
+C5[Base Earnings = $470,177] --> |Low Savings - No Gain-Share| D1[$470,177]
+C5[Base Earnings = $470,177] --> |Most Likely Savings - 20% Gain-Share| D2[$714,949]
+C5[Base Earnings = $470,177] --> |High Savings - 60% Gain-Share| D3[$3,591,016]
+```

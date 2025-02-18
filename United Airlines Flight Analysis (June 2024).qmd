@@ -1,0 +1,228 @@
+---
+title: "United Airlines Flight Analysis (June 2024)"
+author: "Molly McDade, Ann Gray Purdue, Like White, John Carl Tagbor"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: inline
+---
+
+## Key Finding 1 / TL;DR
+
+-   In June, the most cancelled flights were on Wednesdays, Sundays, and Thursday.
+-   The most cancelled flights in a day of June on the last day of the month, June 30th 2024.
+-   United flights in June were more often delayed than early.
+
+## Cancellations Across the Month
+
+Below is R code that details cancellations across June, 2024.
+
+```{r message = FALSE}
+#|  echo: false
+#Loading Relevent Packages
+library(tidyverse)
+library(ggthemes) 
+library(gt)
+
+#Loading Data
+J1<- read_csv("June_1.csv")
+J2<- read_csv("June_2.csv")
+
+#Viewing Data
+glimpse(J1)
+glimpse(J2)
+
+#Filtering Data to United Airlines
+J1 %>% filter(OP_UNIQUE_CARRIER== "UA") -> UA1
+J2 %>% filter(OP_UNIQUE_CARRIER== "UA") -> UA2
+
+#What are the average cancellations for UA across different days?
+Total_Cancelled_By_Day <- UA2 %>%
+  group_by(DAY_OF_MONTH) %>%
+  summarize(Total_Cancel = sum(CANCELLED, na.rm = TRUE)) %>%
+  select(DAY_OF_MONTH, Total_Cancel)
+
+#Create a color vector for each day of the month
+colors <- c("Saturday" = "blue", 
+            "Sunday" = "orange", 
+            "Monday" = "green", 
+            "Tuesday" = "red", 
+            "Wednesday" = "purple", 
+            "Thursday" = "yellow", 
+            "Friday" = "gray")  
+
+# ssign a day of the week number starting from Saturday as 1
+Total_Cancelled_By_Day <- Total_Cancelled_By_Day %>%
+  mutate(Day_Number = (DAY_OF_MONTH + 5) %% 7 + 1,  # Adjusting so that Saturday = 1
+         Day_Name = factor(weekdays(as.Date(paste("2024-06", DAY_OF_MONTH, sep = "-"))), 
+                           levels = names(colors)),  # Create a factor for day names
+         Color = colors[Day_Name])  # Map colors based on Day_Name
+
+#Plot Using ggplot
+ggplot(Total_Cancelled_By_Day, aes(x = DAY_OF_MONTH, y = Total_Cancel, fill = Day_Name)) + 
+  geom_bar(stat = "identity") + 
+  scale_fill_manual(values = colors, name = "Day of the Week") +  # Use scale_fill_manual for the legend
+  theme_minimal() +
+  labs(x = "Day of the Month", y = "Total Canceled Flights", title = "Total Canceled Flights by Day of Month") +
+  theme(legend.position = "right")  # Place the legend on the right
+
+# Create a summary table for total cancelled flights by day of the week
+Worst_Days_for_Cancellations <- Total_Cancelled_By_Day %>%
+  mutate(Day_Name = weekdays(as.Date(paste("2024-06", DAY_OF_MONTH, sep = "-")))) %>%
+  group_by(Day_Name) %>%
+  summarise(Total_Cancelled = sum(Total_Cancel, na.rm = TRUE)) %>%
+  arrange(desc(Total_Cancelled)) 
+
+# View the summary table
+Worst_Days_for_Cancellations 
+
+```
+
+## Key Finding 2: Average Arrival Time
+
+This is to determine the actual average arrival time for United Airlines
+
+```{r}
+#average actual arrive time for UA
+library(tidyverse)
+library(dplyr)
+library(gt)
+average_actual_arrive_time_UA <- UA2 %>%
+  summarize(AverageArrivalTime = mean(ARR_TIME, na.rm = TRUE))
+
+average_actual_arrive_time_UA %>% gt()
+
+```
+
+The average arrival time is 2:44 pm
+
+## Key Finding 3: United Airlines Flight Status
+
+-   This establishes the count and percentage of flights status. Here, the flight status is categorized as Delayed, Early and On-Time.
+
+```{r}
+rm(list=ls())
+
+library(tidyverse)
+library(gt)
+June1 <- read_csv("June_1.csv")
+June2 <- read_csv("June_2.csv")
+
+glimpse(June1)
+
+#Filter by UA (United Airlines)
+
+UAdf1 <- June1 %>% filter(OP_UNIQUE_CARRIER == "UA")
+UAdf2 <- June2 %>% filter(OP_UNIQUE_CARRIER == "UA")
+
+
+#Make a new column to tell if they were on time, early, or delayed
+
+DelayStatus <- UAdf1 %>% mutate(OnTimeStatus = case_when(DEP_DELAY > 0 ~ "Delayed",
+                                                          DEP_DELAY < 0 ~ "Early",
+                                                          TRUE ~ "On-Time")) 
+
+#Sum up these numbers and show percentage
+
+SumDelays <- DelayStatus %>% group_by(OnTimeStatus) %>% 
+  summarize(Flights = n())
+        
+SumDelays <- SumDelays %>% 
+  mutate("Ratio Percentage(%)" = round((Flights/sum(Flights)*100),2))
+
+SumDelays %>%  gt()
+```
+
+-   We determined that 54% of the time, United is Early. 5% of the time, United is On-Time but 41% of the time, United flights are delayed. This insight may useful for a traveler in deciding on whether or not to fly United.
+
+## Key Finding 3: Average Trend of Airlines Flight Status
+
+-   This insight tries to explain the flight status per day of the week.
+
+```{r}
+rm(list=ls())
+
+library(tidyverse)
+library(gt)
+June1 <- read_csv("June_1.csv")
+June2 <- read_csv("June_2.csv")
+
+glimpse(June1)
+
+#Filter by UA (United Airlines)
+
+UAdf1 <- June1 %>% filter(OP_UNIQUE_CARRIER == "UA")
+UAdf2 <- June2 %>% filter(OP_UNIQUE_CARRIER == "UA")
+
+
+#Make a new column to tell if they were on time, early, or delayed
+
+DelayStatus <- UAdf1 %>% mutate(OnTimeStatus = case_when(DEP_DELAY > 0 ~ "Delayed",
+                                                          DEP_DELAY < 0 ~ "Early",
+                                                          TRUE ~ "On-Time")) 
+
+#Sum up these numbers and show percentage
+
+SumDelays <- DelayStatus %>% group_by(OnTimeStatus) %>% 
+  summarize(Flights = n())
+        
+SumDelays <- SumDelays %>% 
+  mutate("Ratio Percentage(%)" = round((Flights/sum(Flights)*100),2))
+
+SumDelays %>%  gt()
+
+
+
+#Line chart by day on-time etc
+
+daysReference <- data.frame(day_of_month = 1:30)
+weekdays <- c("Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
+
+ByDayDelay <- DelayStatus %>%
+  mutate(DAY_OF_WEEK = c("Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday")[
+    (DAY_OF_MONTH - 1) %% 7 + 1])
+
+ByDayDelay <- ByDayDelay %>% mutate(Index = case_when(DAY_OF_WEEK == "Sunday" ~ 1,
+                                     DAY_OF_WEEK == "Monday" ~ 2,
+                                     DAY_OF_WEEK == "Tuesday" ~ 3,
+                                     DAY_OF_WEEK == "Wednesday" ~ 4,
+                                     DAY_OF_WEEK == "Thursday" ~ 5,
+                                     DAY_OF_WEEK == "Friday" ~ 6,
+                                     TRUE ~ 7))
+
+ByDayDelay %>% group_by(DAY_OF_WEEK, OnTimeStatus) %>% 
+  summarize(Flights = n())
+
+ByDayDelay %>%  group_by(OnTimeStatus, DAY_OF_WEEK = factor(DAY_OF_WEEK, levels=weekdays)) %>% 
+  summarize(Flights = n()) %>% 
+  ggplot() + geom_line(aes(x = DAY_OF_WEEK, y = Flights, group = OnTimeStatus,
+                           color = OnTimeStatus), size=1.5) +
+  labs(title = "Weekday Delay Status",
+       subtitle = "June 2024",
+       caption = "source:UA",
+       x = "Day of the Week")
+```
+
+## Business Insights
+
+-   In June of 2024, the most cancelled flights occurred on Wednesday (188), Sunday (169), and Thursday (128).
+-   In June of 2024, flights were less likely to be cancelled on on Tuesday (45), Monday (45), and Friday (84).
+-   Additionally, it appears that there are the most cancelled flights by day on the last day of the month, June 30th 2024, with over 75 cancelled flights in that day alone.
+-   United flights are usually ahead of schedule, however, United flights are more often delayed than they are on time
+-   The Average Actual Arrival time of United Airlines is around 2:44pm.
+
+## Business Implications
+
+-   By investigating the days where the most flights are cancelled, we can better allocate resources, flights, and staff to assist passengers on cancelled flights.
+-   Looking at the days where most flights are cancelled, we should better allocate alternate flights for passengers, and better equip ourselves with the resources needed to house and accommodate for passengers with cancelled flights.
+-   Knowing which days have the most cancellations can also help us find the common causes of flight cancellations.
+
+## Reccomendations
+
+-   Investigate flight cancellations at the end of the month.
+-   Investigate flight cancellations in the middle of the week.
+-   Investigate flight delays and why they are so frequent.
+
+## Function Report
+
+We used many functions from tidyverse in our Flight Data exercise. A few of those examples being, filter(), group_by(), summarize(), ggplot(), read_csv, and some more. This is crucial for a few reasons, it first helped us to load our data in, which we needed in order to do anything. It also helped us with our data analysis, summarization, and visuals.
