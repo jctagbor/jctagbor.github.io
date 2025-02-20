@@ -1,0 +1,30 @@
+project:
+  type: book
+  output-dir: docs
+
+book:
+  title: "MSBA Projects"
+  subtitle: "William & Mary MSBA Portfolio"
+  author: "John Carl Tagbor"
+  date: today
+  downloads: [pdf]
+  chapters:
+    - index.qmd
+    - part: "Predictive Analytics"
+      chapters:
+        - "United Airlines Analysis final.qmd"
+    - part: "Stochastic Modeling"
+      chapters:
+        - "Hershey.qmd"
+    - part: "AI & Machine Learning"
+      chapters:
+        - "AstraSync AIML Services Analysis.qmd"
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+  pdf:
+    documentclass: scrreprt
+    toc: true
+    toc-depth: 2
