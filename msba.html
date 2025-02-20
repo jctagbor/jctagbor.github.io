@@ -10,81 +10,69 @@
             margin: 0;
             padding: 0;
             display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f4f4f4;
         }
-        .sidebar {
-            width: 250px;
+        header {
             background: #333;
             color: white;
             padding: 20px;
-            height: 100vh;
-            position: fixed;
+            width: 100%;
+            text-align: center;
+            font-size: 28px;
         }
-        .sidebar h2 {
-            font-size: 18px;
-            border-bottom: 1px solid white;
-            padding-bottom: 10px;
-        }
-        .sidebar a {
-            display: block;
-            color: white;
-            text-decoration: none;
-            padding: 10px 0;
-        }
-        .sidebar a:hover {
-            background: #575757;
-        }
-        .content {
-            margin-left: 270px;
-            padding: 20px;
+        .container {
             width: 80%;
+            max-width: 900px;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
         }
         .project {
-            background: #f9f9f9;
+            background: #e9ecef;
             padding: 15px;
-            margin: 10px 0;
-            border-radius: 8px;
+            margin: 15px 0;
+            border-radius: 10px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+        a {
+            text-decoration: none;
+            color: #0073e6;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
-        <h2>MSBA Projects</h2>
-        <a href="#intro">MSBA Overview</a>
-        <a href="#courses">Courses Taken</a>
-        <a href="#projects">Projects</a>
-        <a href="timeseries.html">📈 Time Series Project</a>
-        <a href="stochastic.html">🎲 Stochastic Models (Hershey)</a>
-    </div>
+    <header>MSBA Projects Portfolio</header>
 
-    <div class="content">
-        <h1 id="intro">🎓 MSBA at William & Mary</h1>
-        <p>The **Master of Science in Business Analytics (MSBA)** at William & Mary provides hands-on experience in data science, machine learning, and business intelligence, equipping students with the skills to analyze complex data-driven problems.</p>
-
-        <h2 id="courses">📚 Courses Taken</h2>
-        <ul>
-            <li>Stochastic Models</li>
-            <li>Machine Learning for Business</li>
-            <li>Data Visualization & Storytelling</li>
-            <li>Time Series & Forecasting</li>
-            <li>Risk Analytics</li>
-            <li>Big Data Technologies</li>
-        </ul>
-
-        <h2 id="projects">📂 Featured Projects</h2>
+    <div class="container">
+        <h1>Welcome to My MSBA Projects</h1>
+        <p>This page showcases my projects from the MSBA program at William & Mary, covering advanced analytics, AI, and forecasting.</p>
+        
+        <h2>Featured Projects</h2>
 
         <div class="project">
-            <h3>📈 Time Series Analysis</h3>
-            <p>A deep dive into forecasting techniques using ARIMA and LSTMs.</p>
-            <a href="timeseries.html">View Project</a>
+            <h3>📈 United Airlines Analysis</h3>
+            <p>A detailed analysis of United Airlines' operational performance using data visualization and predictive modeling.</p>
+            <a href="United_Airlines_Analysis_final.html">View Project</a>
         </div>
 
         <div class="project">
-            <h3>🎲 Stochastic Models (Hershey)</h3>
-            <p>Analyzing stochastic processes using Hershey's chocolate sales data.</p>
-            <a href="stochastic.html">View Project</a>
+            <h3>🎲 Hershey Stochastic Models</h3>
+            <p>Exploring stochastic processes in Hershey's chocolate sales data using statistical methods.</p>
+            <a href="Hershey.html">View Project</a>
         </div>
 
+        <div class="project">
+            <h3>🤖 AstraSync AIML Services Analysis</h3>
+            <p>An AI/ML-driven analysis of AstraSync services, leveraging predictive analytics for optimization.</p>
+            <a href="AstraSync_AIML_Services_Analysis.html">View Project</a>
+        </div>
     </div>
 
 </body>
