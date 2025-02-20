@@ -1,24 +1,61 @@
-msba:
-  title: "MSBA Projects | John Carl Tagbor"
-  description: "A collection of my MSBA projects at William & Mary, covering advanced analytics, AI, and forecasting."
+project:
+  type: book
+  output-dir: docs
 
-  courses:
-    - "Stochastic Models"
-    - "Machine Learning for Business"
-    - "Data Visualization & Storytelling"
-    - "Time Series & Forecasting"
-    - "Risk Analytics"
-    - "Big Data Technologies"
+title-block-banner: "#000000"
 
-  projects:
-    - name: "United Airlines Analysis"
-      description: "A detailed analysis of United Airlines' operational performance using data visualization and predictive modeling."
-      file: "United Airlines Analysis final.qmd"
+book:
+  page-footer:
+    left: |
+      MSBA Projects by John Carl Tagbor.
+    right: |
+      This project collection was built with <a href="https://quarto.org/">Quarto</a>.
+  title: "MSBA Projects"
+  subtitle: "William & Mary MSBA Portfolio"
+  author: "John Carl Tagbor"
+  date: "02/20/2025"
+  cover-image: images/cover.png
+  downloads: [pdf]
+  chapters:
+    - index.qmd
+    - part: "Predictive Analytics"
+      chapters:
+        - "United Airlines Analysis final.qmd"
+    - part: "Stochastic Modeling"
+      chapters:
+        - "Hershey.qmd"
+    - part: "AI & Machine Learning"
+      chapters:
+        - "AstraSync AIML Services Analysis.qmd"
+    
+bibliography: references.bib
 
-    - name: "Hershey Stochastic Models"
-      description: "Exploring stochastic processes in Hershey's chocolate sales data using statistical methods."
-      file: "Hershey.qmd"
+format:
+  html:
+    theme: cosmo
+    css: style.css
+  pdf:
+    documentclass: scrreprt
+    toc: true
+    toc-depth: 2
+    geometry:
+      - margin=1in
+      - heightrounded
+    hyperrefoptions:
+      - linktoc=all
+    colorlinks: true
+    linkcolor: "blue"
+    biblio-style: apalike
+    keep-tex: true
+    code-block-bg: true
+    code-overflow: wrap
+    code-line-numbers: true
+    include-in-header:
+      text: |
+        \usepackage{makeidx}
+        \makeindex
+    include-after-body:
+      text: |
+        \printindex
 
-    - name: "AstraSync AIML Services Analysis"
-      description: "An AI/ML-driven analysis of AstraSync services, leveraging predictive analytics for optimization."
-      file: "AstraSync AIML Services Analysis.qmd"
+editor: visual
