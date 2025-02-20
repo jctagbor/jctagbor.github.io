@@ -1,0 +1,24 @@
+msba:
+  title: "MSBA Projects | John Carl Tagbor"
+  description: "A collection of my MSBA projects at William & Mary, covering advanced analytics, AI, and forecasting."
+
+  courses:
+    - "Stochastic Models"
+    - "Machine Learning for Business"
+    - "Data Visualization & Storytelling"
+    - "Time Series & Forecasting"
+    - "Risk Analytics"
+    - "Big Data Technologies"
+
+  projects:
+    - name: "United Airlines Analysis"
+      description: "A detailed analysis of United Airlines' operational performance using data visualization and predictive modeling."
+      file: "United Airlines Analysis final.qmd"
+
+    - name: "Hershey Stochastic Models"
+      description: "Exploring stochastic processes in Hershey's chocolate sales data using statistical methods."
+      file: "Hershey.qmd"
+
+    - name: "AstraSync AIML Services Analysis"
+      description: "An AI/ML-driven analysis of AstraSync services, leveraging predictive analytics for optimization."
+      file: "AstraSync AIML Services Analysis.qmd"
