@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Application Review System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-blue: #003366;
+            --secondary-blue: #004080;
+            --accent-blue: #00509d;
+            --light-blue: #e6f2ff;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        
+        .header {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            background-color: var(--secondary-blue);
+            color: white;
+            font-weight: 600;
+            border-radius: 8px 8px 0 0 !important;
+        }
+        
+        .btn-primary {
+            background-color: var(--accent-blue);
+            border-color: var(--accent-blue);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-blue);
+            border-color: var(--secondary-blue);
+        }
+        
+        .btn-outline-primary {
+            color: var(--accent-blue);
+            border-color: var(--accent-blue);
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--accent-blue);
+            color: white;
+        }
+        
+        .decision-approved {
+            background-color: #d4edda;
+            color: #155724;
+            border-left: 5px solid #28a745;
+        }
+        
+        .decision-rejected {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-left: 5px solid #dc3545;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: var(--primary-blue);
+        }
+        
+        .section-divider {
+            border-top: 2px solid var(--light-blue);
+            margin: 20px 0;
+        }
+        
+        .probability-meter {
+            height: 20px;
+            background-color: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .probability-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #dc3545, #ffc107, #28a745);
+        }
+        
+        .form-select:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 0.25rem rgba(0, 80, 157, 0.25);
+        }
+        
+        .file-upload {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+        
+        .file-upload-input {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        .filter-btn {
+            background-color: var(--light-blue);
+            border: 1px solid var(--accent-blue);
+            color: var(--primary-blue);
+        }
+        
+        .filter-btn:hover {
+            background-color: var(--accent-blue);
+            color: white;
+        }
+        
+        .filter-card {
+            border-left: 4px solid var(--accent-blue);
+        }
+        
+        .dropdown-menu {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        /* Analytics Dashboard Styles */
+        .factor-bar {
+            height: 8px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+        
+        .factor-fill {
+            height: 100%;
+            border-radius: 4px;
+        }
+        
+        .factor-positive {
+            background-color: #28a745;
+        }
+        
+        .factor-negative {
+            background-color: #dc3545;
+        }
+        
+        .factor-neutral {
+            background-color: #ffc107;
+        }
+        
+        .analytics-card {
+            border-left: 4px solid #6610f2;
+        }
+        
+        .improvement-item {
+            background-color: #f8f9fa;
+            border-left: 4px solid #17a2b8;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        
+        .improvement-item h6 {
+            color: #17a2b8;
+            margin-bottom: 5px;
+        }
+        
+        .analytics-icon {
+            font-size: 1.5rem;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        
+        .improvement-target {
+            font-weight: 600;
+            color: #28a745;
+        }
+        
+        .credit-factor {
+            padding: 8px 0;
+        }
+        
+        .radar-chart {
+            width: 100%;
+            height: 250px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1><i class="bi bi-clipboard-data"></i> Loan Application Review System</h1>
+                </div>
+                <div class="col-md-4 text-end">
+                    <img src="https://i.ibb.co/8nHBqsmb/T15logo.png" alt="Company Logo" style="height: 40px;">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-md-8 mx-auto">
+                <div class="card">
+                    <div class="card-header">
+                        Load Application Data
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="csvFile" class="form-label">Upload your loan applications CSV file:</label>
+                            <div class="file-upload btn btn-primary w-100">
+                                <span id="fileName">Choose file...</span>
+                                <input type="file" class="file-upload-input" id="csvFile" accept=".csv">
+                            </div>
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> Please upload the "LOANAPP_Predictions.csv" file from your desktop
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mb-4" id="applicationFilters" style="display: none;">
+            <div class="col-md-8 mx-auto">
+                <div class="card filter-card">
+                    <div class="card-header">
+                        Filter Applications
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="dateFilter" class="form-label">Date Filter</label>
+                                <input type="date" class="form-control" id="dateFilter">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="statusFilter" class="form-label">Status Filter</label>
+                                <select class="form-select" id="statusFilter">
+                                    <option value="">All Statuses</option>
+                                    <option value="Approved">Approved</option>
+                                    <option value="Rejected">Rejected</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="clearFilters" class="form-label">&nbsp;</label>
+                                <button class="btn filter-btn w-100" id="clearFilters">
+                                    <i class="bi bi-x-circle"></i> Clear Filters
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mb-4" id="applicationSelection" style="display: none;">
+            <div class="col-md-8 mx-auto">
+                <div class="card">
+                    <div class="card-header">
+                        Select Application
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="applicationSearch" placeholder="Search by Application ID...">
+                                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-list"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end w-100" id="applicationDropdown">
+                                        <!-- Application IDs will be populated here -->
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-primary w-100" id="loadBtn" disabled>
+                                    <i class="bi bi-search"></i> Load Application
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row" id="applicationDetails" style="display: none;">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        Application Details
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><span class="detail-label">Full Name:</span> <span id="fullName"></span></p>
+                                <p><span class="detail-label">Date of Birth:</span> <span id="dob"></span></p>
+                                <p><span class="detail-label">Gender:</span> <span id="gender"></span></p>
+                                <p><span class="detail-label">Email:</span> <span id="email"></span></p>
+                                <p><span class="detail-label">Phone:</span> <span id="phone"></span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><span class="detail-label">Application ID:</span> <span id="appId"></span></p>
+                                <p><span class="detail-label">Application Date:</span> <span id="appDate"></span></p>
+                                <p><span class="detail-label">Address:</span> <span id="address"></span></p>
+                                <p><span class="detail-label">No. of Dependents:</span> <span id="dependents"></span></p>
+                            </div>
+                        </div>
+                        
+                        <div class="section-divider"></div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><span class="detail-label">Education:</span> <span id="education"></span></p>
+                                <p><span class="detail-label">Employment Status:</span> <span id="employment"></span></p>
+                                <p><span class="detail-label">Annual Income:</span> $<span id="income"></span></p>
+                                <p><span class="detail-label">Years in Current Job:</span> <span id="jobYears"></span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><span class="detail-label">Credit Score:</span> <span id="creditScore"></span></p>
+                                <p><span class="detail-label">Existing Loans:</span> <span id="existingLoans"></span></p>
+                                <p><span class="detail-label">Loan Purpose:</span> <span id="loanPurpose"></span></p>
+                            </div>
+                        </div>
+                        
+                        <div class="section-divider"></div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><span class="detail-label">Loan Amount Requested:</span> $<span id="loanAmount"></span></p>
+                                <p><span class="detail-label">Loan Term:</span> <span id="loanTerm"></span> months</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><span class="detail-label">Residential Assets:</span> $<span id="residentialAssets"></span></p>
+                                <p><span class="detail-label">Commercial Assets:</span> $<span id="commercialAssets"></span></p>
+                                <p><span class="detail-label">Luxury Assets:</span> $<span id="luxuryAssets"></span></p>
+                                <p><span class="detail-label">Bank Assets:</span> $<span id="bankAssets"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Analytics Dashboard -->
+                <div class="card analytics-card">
+                    <div class="card-header">
+                        <i class="bi bi-graph-up"></i> Credit Analysis & Recommendations
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <h5><i class="bi bi-key"></i> Key Decision Factors</h5>
+                                <p class="text-muted small mb-3">The following factors had the most significant impact on this loan decision:</p>
+                                
+                                <div id="creditFactors">
+                                    <!-- Credit factors will be populated dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="section-divider"></div>
+                        
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h5><i class="bi bi-arrow-up-circle"></i> Improvement Recommendations</h5>
+                                <p class="text-muted small mb-3" id="improvementIntro">These improvements could help increase approval chances or qualify for better loan terms:</p>
+                                
+                                <div id="improvementRecommendations">
+                                    <!-- Recommendations will be populated dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        Application Decision
+                    </div>
+                    <div class="card-body">
+                        <div id="decisionBox" class="p-3 mb-4 rounded">
+                            <h5 class="mb-3">Decision: <span id="decisionText"></span></h5>
+                            <div class="mb-3">
+                                <span class="detail-label">Probability of Default:</span> <span id="defaultProb"></span>%
+                            </div>
+                            <div class="probability-meter mb-3">
+                                <div class="probability-fill" id="probabilityBar"></div>
+                            </div>
+                            <div class="small text-muted">
+                                <span id="decisionDetails"></span>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-3">
+                            <button class="btn btn-primary" id="downloadPdf">
+                                <i class="bi bi-file-earmark-pdf"></i> Download PDF
+                            </button>
+                            <button class="btn btn-outline-primary" id="sendEmail">
+                                <i class="bi bi-envelope"></i> Send Decision Email
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Credit Score Visualization -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <i class="bi bi-speedometer"></i> Credit Profile Overview
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            <div id="creditScoreGauge" style="width: 100%; height: 150px;"></div>
+                            <h5 class="mt-2"><span id="creditScoreDisplay">N/A</span></h5>
+                            <p class="text-muted small" id="creditScoreCategory">Credit Score Category</p>
+                        </div>
+                        
+                        <div class="section-divider"></div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <h6 class="mb-3">Credit Profile Comparison</h6>
+                                <div id="radarChart" class="radar-chart"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    
+    <script>
+        // Global variables to store application data
+        let applications = [];
+        let filteredApplications = [];
+        let currentRadarChart = null;
+        let currentGaugeChart = null;
+        
+        // Function to handle file upload
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            // Update file name display
+            document.getElementById('fileName').textContent = file.name;
+            
+            // Parse the CSV file
+            Papa.parse(file, {
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    applications = results.data;
+                    
+                    if (applications.length > 0) {
+                        // Format dates and extract unique dates for filtering
+                        applications.forEach(app => {
+                            if (app['Time']) {
+                                // Assuming Time field is in a format like "MM/DD/YYYY hh:mm:ss"
+                                const dateParts = app['Time'].split(' ')[0].split('/');
+                                if (dateParts.length === 3) {
+                                    // Store a formatted date for display
+                                    app['FormattedDate'] = dateParts[0] + '/' + dateParts[1] + '/' + dateParts[2];
+                                    
+                                    // Store a sortable date for filtering (YYYY-MM-DD)
+                                    const month = dateParts[0].padStart(2, '0');
+                                    const day = dateParts[1].padStart(2, '0');
+                                    const year = dateParts[2];
+                                    app['SortableDate'] = `${year}-${month}-${day}`;
+                                }
+                            }
+                        });
+                        
+                        // Show filter section and application selection
+                        document.getElementById('applicationFilters').style.display = 'flex';
+                        document.getElementById('applicationSelection').style.display = 'flex';
+                        
+                        // Apply initial filtering (no filters)
+                        applyFilters();
+                    } else {
+                        alert("No valid application data found in the file.");
+                    }
+                },
+                error: function(error) {
+                    console.error("Error parsing CSV:", error);
+                    alert("Error parsing the CSV file. Please check the file format.");
+                }
+            });
+        }
+        
+        // Function to apply all filters
+        function applyFilters() {
+            const dateFilter = document.getElementById('dateFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            const searchText = document.getElementById('applicationSearch').value.trim().toLowerCase();
+            
+            filteredApplications = applications.filter(app => {
+                // Date filter
+                const dateMatch = !dateFilter || app['SortableDate'] === dateFilter;
+                
+                // Status filter
+                const statusMatch = !statusFilter || app['Predicted_Approval'] === statusFilter;
+                
+                // ID search filter
+                const idMatch = !searchText || 
+                    (app['Application ID'] && app['Application ID'].toLowerCase().includes(searchText)) || 
+                    (app['Full Name'] && app['Full Name'].toLowerCase().includes(searchText));
+                
+                return dateMatch && statusMatch && idMatch;
+            });
+            
+            updateApplicationDropdown();
+        }
+        
+        // Function to update the application dropdown
+        function updateApplicationDropdown() {
+            const dropdown = document.getElementById('applicationDropdown');
+            
+            // Clear existing options
+            dropdown.innerHTML = '';
+            
+            if (filteredApplications.length === 0) {
+                const noResults = document.createElement('li');
+                noResults.className = 'dropdown-item text-muted';
+                noResults.textContent = 'No applications match the filters';
+                dropdown.appendChild(noResults);
+                document.getElementById('loadBtn').disabled = true;
+                return;
+            }
+            
+            // Add filtered applications to dropdown
+            filteredApplications.forEach(app => {
+                if (app['Application ID']) {
+                    const item = document.createElement('li');
+                    const link = document.createElement('a');
+                    link.className = 'dropdown-item';
+                    link.href = '#';
+                    
+                    // Create a badge for application status
+                    const status = app['Predicted_Approval'] === 'Approved' ? 
+                        '<span class="badge bg-success ms-2">Approved</span>' : 
+                        '<span class="badge bg-danger ms-2">Rejected</span>';
+                    
+                    // Format the dropdown item with ID, name and date
+                    link.innerHTML = `${app['Application ID']} - ${app['Full Name']} ${status} <br>
+                                      <small class="text-muted">Date: ${app['FormattedDate'] || 'N/A'}</small>`;
+                    
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        document.getElementById('applicationSearch').value = app['Application ID'];
+                        document.getElementById('loadBtn').disabled = false;
+                        displayApplicationDetails(app['Application ID']);
+                    });
+                    
+                    item.appendChild(link);
+                    dropdown.appendChild(item);
+                }
+            });
+            
+            // Enable the load button if we have applications
+            document.getElementById('loadBtn').disabled = false;
+        }
+        
+        // Function to analyze credit factors and generate recommendations
+        function analyzeApplication(application) {
+            // Extract key metrics
+            const creditScore = parseInt(application['Credit Score']) || 0;
+            const income = parseInt(application['Income']) || 0;
+            const loanAmount = parseInt(application['Loan Amount']) || 0;
+            const existingLoans = parseInt(application['Existing Loans']) || 0;
+            const jobYears = parseInt(application['Job Years']) || 0;
+            const dependents = parseInt(application['No of dependents']) || 0;
+            
+            // Calculate total assets
+            const residentialAssets = parseInt(application['Residential Assets Value']) || 0;
+            const commercialAssets = parseInt(application['Commercial Assets Value']) || 0;
+            const luxuryAssets = parseInt(application['Luxury Assets Value']) || 0;
+            const bankAssets = parseInt(application['Bank Asset Value']) || 0;
+            const totalAssets = residentialAssets + commercialAssets + luxuryAssets + bankAssets;
+            
+            // Calculate debt-to-income ratio (estimated)
+            const estimatedMonthlyPayment = (loanAmount / parseInt(application['Loan Term'] || 36)) * 1.1; // Adding 10% for interest
+            const monthlyIncome = income / 12;
+            const dti = (estimatedMonthlyPayment / monthlyIncome) * 100;
+            
+            // Calculate loan-to-value ratio (if we have collateral assets)
+            const ltv = (loanAmount / totalAssets) * 100;
+            
+            // Build factors array with weights
+            const factors = [
+                {
+                    name: "Credit Score",
+                    value: creditScore,
+                    weight: creditScore >= 720 ? 90 : creditScore >= 680 ? 75 : creditScore >= 620 ? 50 : 30,
+                    impact: creditScore >= 720 ? "positive" : creditScore >= 620 ? "neutral" : "negative",
+                    details: creditScore >= 720 ? "Excellent" : creditScore >= 680 ? "Good" : creditScore >= 620 ? "Fair" : "Poor"
+                },
+                {
+                    name: "Debt-to-Income Ratio",
+                    value: dti.toFixed(1) + "%",
+                    weight: dti <= 28 ? 90 : dti <= 36 ? 75 : dti <= 43 ? 50 : 25,
+                    impact: dti <= 28 ? "positive" : dti <= 43 ? "neutral" : "negative",
+                    details: dti <= 28 ? "Low" : dti <= 36 ? "Moderate" : dti <= 43 ? "High" : "Very High"
+                },
+                {
+                    name: "Employment History",
+                    value: jobYears + " years",
+                    weight: jobYears >= 5 ? 85 : jobYears >= 2 ? 65 : jobYears >= 1 ? 45 : 25,
+                    impact: jobYears >= 2 ? "positive" : jobYears >= 1 ? "neutral" : "negative",
+                    details: jobYears >= 5 ? "Excellent" : jobYears >= 2 ? "Good" : jobYears >= 1 ? "Fair" : "Limited"
+                },
+                {
+                    name: "Loan-to-Value Ratio",
+                    value: isFinite(ltv) ? ltv.toFixed(1) + "%" : "N/A",
+                    weight: ltv <= 60 ? 90 : ltv <= 80 ? 70 : ltv <= 95 ? 40 : 20,
+                    impact: ltv <= 80 ? "positive" : ltv <= 95 ? "neutral" : "negative",
+                    details: ltv <= 60 ? "Low" : ltv <= 80 ? "Good" : ltv <= 95 ? "High" : "Very High"
+                },
+                {
+                    name: "Income Level",
+                    value: "$" + income.toLocaleString(),
+                    weight: income >= 100000 ? 90 : income >= 60000 ? 75 : income >= 40000 ? 60 : 40,
+                    impact: income >= 60000 ? "positive" : income >= 40000 ? "neutral" : "negative",
+                    details: income >= 100000 ? "High" : income >= 60000 ? "Above Average" : income >= 40000 ? "Average" : "Below Average"
+                }
+            ];
+            
+            // Sort factors by weight
+            factors.sort((a, b) => b.weight - a.weight);
+            
+            // Generate improvement recommendations
+            const recommendations = [];
+            
+            if (creditScore < 720) {
+                recommendations.push({
+                    title: "Improve Credit Score",
+                    icon: "bi-credit-card",
+                    description: "Pay down credit card balances, make payments on time, and address any negative items on your credit report.",
+                    target: "Target: 720+ (Currently: " + creditScore + ")"
+                });
+            }
+            
+            if (dti > 36) {
+                recommendations.push({
+                    title: "Reduce Debt-to-Income Ratio",
+                    icon: "bi-currency-dollar",
+                    description: "Pay down existing debts or consider requesting a lower loan amount to improve this ratio.",
+                    target: "Target: Below 36% (Currently: " + dti.toFixed(1) + "%)"
+                });
+            }
+            
+            if (ltv > 80 && isFinite(ltv)) {
+                recommendations.push({
+                    title: "Increase Collateral Assets",
+                    icon: "bi-house",
+                    description: "Consider adding more collateral to your application to reduce the loan-to-value ratio.",
+                    target: "Target: Below 80% (Currently: " + ltv.toFixed(1) + "%)"
+                });
+            }
+            
+            if (income < 60000) {
+                recommendations.push({
+                    title: "Increase Verifiable Income",
+                    icon: "bi-cash-stack",
+                    description: "Additional sources of income or a co-applicant could strengthen the application.",
+                    target: "Target: $60,000+ (Currently: $" + income.toLocaleString() + ")"
+                });
+            }
+            
+            if (jobYears < 2) {
+                recommendations.push({
+                    title: "Longer Employment History",
+                    icon: "bi-briefcase",
+                    description: "Lenders prefer stable employment of at least 2 years in the same field.",
+                    target: "Target: 2+ years (Currently: " + jobYears + " years)"
+                });
+            }
+            
+            // Limit to top 3 recommendations
+            recommendations.splice(3);
+            
+            return {
+                factors: factors.slice(0, 5), // Top 5 factors
+                recommendations: recommendations
+            };
+        }
+        
+        // Complete the renderCreditFactors function that was cut off
+        function renderCreditFactors(factors) {
+            const factorsContainer = document.getElementById('creditFactors');
+            factorsContainer.innerHTML = '';
+            
+            factors.forEach(factor => {
+                const factorDiv = document.createElement('div');
+                factorDiv.className = 'credit-factor';
+                
+                factorDiv.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div><strong>${factor.name}</strong>: ${factor.value}</div>
+                        <div class="badge ${factor.impact === 'positive' ? 'bg-success' : factor.impact === 'neutral' ? 'bg-warning' : 'bg-danger'}">
+                            ${factor.details}
+                        </div>
+                    </div>
+                    <div class="factor-bar">
+                        <div class="factor-fill factor-${factor.impact}" style="width: ${factor.weight}%"></div>
+                    </div>
+                    <div class="small text-muted mb-3">${getFactorDescription(factor.name, factor.impact)}</div>
+                `;
+                
+                factorsContainer.appendChild(factorDiv);
+            });
+        }
+
+        // Helper function to get descriptions for credit factors
+        function getFactorDescription(factorName, impact) {
+            const descriptions = {
+                'Credit Score': {
+                    'positive': 'Strong credit history indicates responsible financial management.',
+                    'neutral': 'Average credit score suggests some past credit issues.',
+                    'negative': 'Low credit score indicates significant credit problems.'
+                },
+                'Debt-to-Income Ratio': {
+                    'positive': 'Low DTI ratio shows strong ability to take on additional debt.',
+                    'neutral': 'Moderate DTI ratio is acceptable but leaves limited room for additional debt.',
+                    'negative': 'High DTI ratio indicates potential difficulty managing additional loan payments.'
+                },
+                'Employment History': {
+                    'positive': 'Stable employment history demonstrates reliable income source.',
+                    'neutral': 'Moderate job tenure provides reasonable income stability.',
+                    'negative': 'Limited employment history creates uncertainty about income stability.'
+                },
+                'Loan-to-Value Ratio': {
+                    'positive': 'Low LTV ratio provides strong collateral coverage for the loan.',
+                    'neutral': 'Moderate LTV ratio provides adequate collateral for the loan amount.',
+                    'negative': 'High LTV ratio indicates limited collateral protection for the lender.'
+                },
+                'Income Level': {
+                    'positive': 'Strong income level supports ability to make loan payments.',
+                    'neutral': 'Moderate income provides reasonable capacity for loan repayment.',
+                    'negative': 'Lower income level may strain ability to make consistent payments.'
+                }
+            };
+            
+            return descriptions[factorName]?.[impact] || 'This factor contributes to the overall loan decision.';
+        }
+
+        // Function to render improvement recommendations
+        function renderImprovementRecommendations(recommendations) {
+            const recommendationsContainer = document.getElementById('improvementRecommendations');
+            recommendationsContainer.innerHTML = '';
+            
+            if (recommendations.length === 0) {
+                document.getElementById('improvementIntro').textContent = 'No specific improvements needed for this application.';
+                
+                const noRecommendations = document.createElement('div');
+                noRecommendations.className = 'improvement-item';
+                noRecommendations.innerHTML = `
+                    <h6><i class="bi bi-check-circle text-success"></i> Strong Application</h6>
+                    <p>This application meets or exceeds our requirements in all major categories.</p>
+                `;
+                
+                recommendationsContainer.appendChild(noRecommendations);
+                return;
+            }
+            
+            recommendations.forEach(rec => {
+                const recDiv = document.createElement('div');
+                recDiv.className = 'improvement-item';
+                
+                recDiv.innerHTML = `
+                    <h6><i class="bi ${rec.icon}"></i> ${rec.title}</h6>
+                    <p>${rec.description}</p>
+                    <p class="improvement-target">${rec.target}</p>
+                `;
+                
+                recommendationsContainer.appendChild(recDiv);
+            });
+        }
+
+        // Function to create credit score gauge chart
+        function createCreditScoreGauge(creditScore) {
+            // Destroy previous chart if it exists
+            if (currentGaugeChart) {
+                currentGaugeChart.destroy();
+            }
+            
+            const ctx = document.getElementById('creditScoreGauge').getContext('2d');
+            
+            // Determine category and color based on credit score
+            let category, color, percentage;
+            
+            if (creditScore >= 800) {
+                category = 'Excellent';
+                color = '#28a745'; // Green
+                percentage = 95;
+            } else if (creditScore >= 740) {
+                category = 'Very Good';
+                color = '#5cb85c'; // Light green
+                percentage = 80;
+            } else if (creditScore >= 670) {
+                category = 'Good';
+                color = '#4bbf73'; // Blue-green
+                percentage = 65;
+            } else if (creditScore >= 580) {
+                category = 'Fair';
+                color = '#f0ad4e'; // Yellow
+                percentage = 45;
+            } else if (creditScore >= 300) {
+                category = 'Poor';
+                color = '#dc3545'; // Red
+                percentage = 25;
+            } else {
+                category = 'N/A';
+                color = '#6c757d'; // Gray
+                percentage = 0;
+            }
+            
+            // Update category display
+            document.getElementById('creditScoreDisplay').textContent = creditScore;
+            document.getElementById('creditScoreCategory').textContent = category;
+            
+            // Create gauge chart
+            currentGaugeChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [percentage, 100 - percentage],
+                        backgroundColor: [color, '#e9ecef'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    circumference: 180,
+                    rotation: 270,
+                    cutout: '70%',
+                    plugins: {
+                        tooltip: {
+                            enabled: false
+                        },
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+            
+            return currentGaugeChart;
+        }
+
+        // Function to create radar chart for credit profile comparison
+        function createRadarChart(application) {
+            // Destroy previous chart if it exists
+            if (currentRadarChart) {
+                currentRadarChart.destroy();
+            }
+            
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            
+            // Normalize values for radar chart (0-100 scale)
+            const creditScore = parseInt(application['Credit Score']) || 0;
+            const normalizedCreditScore = Math.min(Math.max((creditScore - 300) / 5, 0), 100);
+            
+            const income = parseInt(application['Income']) || 0;
+            const normalizedIncome = Math.min(income / 1500, 100); // 150k = 100%
+            
+            const jobYears = parseInt(application['Job Years']) || 0;
+            const normalizedJobYears = Math.min(jobYears * 10, 100); // 10 years = 100%
+            
+            // Calculate total assets
+            const residentialAssets = parseInt(application['Residential Assets Value']) || 0;
+            const commercialAssets = parseInt(application['Commercial Assets Value']) || 0;
+            const luxuryAssets = parseInt(application['Luxury Assets Value']) || 0;
+            const bankAssets = parseInt(application['Bank Asset Value']) || 0;
+            const totalAssets = residentialAssets + commercialAssets + luxuryAssets + bankAssets;
+            const normalizedAssets = Math.min(totalAssets / 10000, 100); // 1M = 100%
+            
+            // Calculate debt-to-income (lower is better, so invert the scale)
+            const loanAmount = parseInt(application['Loan Amount']) || 0;
+            const monthlyIncome = income / 12;
+            const estimatedMonthlyPayment = (loanAmount / parseInt(application['Loan Term'] || 36)) * 1.1;
+            const dti = (estimatedMonthlyPayment / monthlyIncome) * 100;
+            const normalizedDTI = Math.max(100 - dti * 2, 0); // 0% DTI = 100, 50% DTI = 0
+            
+            currentRadarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Credit Score', 'Income', 'Employment', 'Assets', 'DTI Ratio'],
+                    datasets: [
+                        {
+                            label: 'Applicant Profile',
+                            data: [normalizedCreditScore, normalizedIncome, normalizedJobYears, normalizedAssets, normalizedDTI],
+                            backgroundColor: 'rgba(0, 80, 157, 0.2)',
+                            borderColor: 'rgba(0, 80, 157, 0.8)',
+                            pointBackgroundColor: 'rgba(0, 80, 157, 1)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgba(0, 80, 157, 1)'
+                        },
+                        {
+                            label: 'Approval Threshold',
+                            data: [65, 50, 50, 40, 60], // Threshold values
+                            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                            borderColor: 'rgba(40, 167, 69, 0.6)',
+                            borderDash: [5, 5],
+                            pointBackgroundColor: 'rgba(40, 167, 69, 0.7)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgba(40, 167, 69, 1)'
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        r: {
+                            angleLines: {
+                                display: true
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+            
+            return currentRadarChart;
+        }
+
+        // Function to format currency values
+        function formatCurrency(value) {
+            const numValue = parseFloat(value) || 0;
+            return numValue.toLocaleString('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        // Function to display application details
+        function displayApplicationDetails(applicationId) {
+            // Find the application in the filtered list
+            const application = filteredApplications.find(app => app['Application ID'] === applicationId);
+            
+            if (!application) {
+                alert("Application not found.");
+                return;
+            }
+            
+            // Display application details
+            document.getElementById('fullName').textContent = application['Full Name'] || 'N/A';
+            document.getElementById('dob').textContent = application['Date of Birth'] || 'N/A';
+            document.getElementById('gender').textContent = application['Gender'] || 'N/A';
+            document.getElementById('email').textContent = application['Email'] || 'N/A';
+            document.getElementById('phone').textContent = application['Phone'] || 'N/A';
+            
+            document.getElementById('appId').textContent = application['Application ID'] || 'N/A';
+            document.getElementById('appDate').textContent = application['FormattedDate'] || 'N/A';
+            document.getElementById('address').textContent = application['Address'] || 'N/A';
+            document.getElementById('dependents').textContent = application['No of dependents'] || 'N/A';
+            
+            document.getElementById('education').textContent = application['Education'] || 'N/A';
+            document.getElementById('employment').textContent = application['Employment Status'] || 'N/A';
+            document.getElementById('income').textContent = parseInt(application['Income']).toLocaleString() || 'N/A';
+            document.getElementById('jobYears').textContent = application['Job Years'] || 'N/A';
+            
+            document.getElementById('creditScore').textContent = application['Credit Score'] || 'N/A';
+            document.getElementById('existingLoans').textContent = application['Existing Loans'] || 'N/A';
+            document.getElementById('loanPurpose').textContent = application['Loan Purpose'] || 'N/A';
+            
+            document.getElementById('loanAmount').textContent = parseInt(application['Loan Amount']).toLocaleString() || 'N/A';
+            document.getElementById('loanTerm').textContent = application['Loan Term'] || 'N/A';
+            
+            document.getElementById('residentialAssets').textContent = parseInt(application['Residential Assets Value']).toLocaleString() || 'N/A';
+            document.getElementById('commercialAssets').textContent = parseInt(application['Commercial Assets Value']).toLocaleString() || 'N/A';
+            document.getElementById('luxuryAssets').textContent = parseInt(application['Luxury Assets Value']).toLocaleString() || 'N/A';
+            document.getElementById('bankAssets').textContent = parseInt(application['Bank Asset Value']).toLocaleString() || 'N/A';
+            
+            // Set decision status
+            const isApproved = application['Predicted_Approval'] === 'Approved';
+            const decisionBox = document.getElementById('decisionBox');
+            const decisionText = document.getElementById('decisionText');
+            
+            decisionBox.className = isApproved ? 'p-3 mb-4 rounded decision-approved' : 'p-3 mb-4 rounded decision-rejected';
+            decisionText.textContent = isApproved ? 'Approved' : 'Rejected';
+            
+            // Set probability of default
+            const defaultProb = 100 - parseFloat(application['Approval_Probability_Pct'] || 0).toFixed(2);
+            document.getElementById('defaultProb').textContent = defaultProb;
+            
+            // Set probability bar width
+            const probabilityBar = document.getElementById('probabilityBar');
+            probabilityBar.style.width = defaultProb + '%';
+            
+            // Set decision details
+            document.getElementById('decisionDetails').textContent = isApproved ? 
+                `This application has been approved based on the applicant's credit profile and financial situation. Default probability is relatively low at ${defaultProb}%.` :
+                `This application has been rejected due to high default risk factors in the applicant's profile. Default probability is ${defaultProb}%.`;
+            
+            // Show application details
+            document.getElementById('applicationDetails').style.display = 'flex';
+            
+            // Analyze application and render factors and recommendations
+            const analysis = analyzeApplication(application);
+            renderCreditFactors(analysis.factors);
+            renderImprovementRecommendations(analysis.recommendations);
+            
+            // Create visualizations
+            createCreditScoreGauge(parseInt(application['Credit Score']) || 0);
+            createRadarChart(application);
+        }
+
+        // Event Listeners - Initialize when document is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // File upload event
+            document.getElementById('csvFile').addEventListener('change', handleFileUpload);
+            
+            // Filter events
+            document.getElementById('dateFilter').addEventListener('change', applyFilters);
+            document.getElementById('statusFilter').addEventListener('change', applyFilters);
+            document.getElementById('applicationSearch').addEventListener('input', applyFilters);
+            
+            // Clear filters button
+            document.getElementById('clearFilters').addEventListener('click', function() {
+                document.getElementById('dateFilter').value = '';
+                document.getElementById('statusFilter').value = '';
+                document.getElementById('applicationSearch').value = '';
+                applyFilters();
+            });
+            
+            // Load application button
+            document.getElementById('loadBtn').addEventListener('click', function() {
+                const appId = document.getElementById('applicationSearch').value.trim();
+                if (appId) {
+                    displayApplicationDetails(appId);
+                }
+            });
+            
+            // PDF download button (mock functionality)
+            document.getElementById('downloadPdf').addEventListener('click', function() {
+                alert('PDF download feature would be implemented here.');
+            });
+            
+            // Send email button (mock functionality)
+            document.getElementById('sendEmail').addEventListener('click', function() {
+                alert('Email sending feature would be implemented here.');
+            });
+        });
+    </script>
+</body>
+</html>

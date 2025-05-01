@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <title>Team15 Bank - Loan Application</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    :root {
+      --primary-color: #0d47a1;
+      --primary-light: #1565c0;
+      --secondary-color: #bbdefb;
+      --accent-color: #2196f3;
+      --success-color: #43a047;
+      --danger-color: #e53935;
+      --text-color: #333;
+      --text-light: #757575;
+      --background-color: #ffffff;
+      --card-color: #F3F3F3;
+      --border-radius: 9px;
+      --box-shadow: 0 4px 16px rgba(0, 0, 0, 0.8);
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 2rem;
+    }
+
+    .form-card {
+      background: var(--card-color);
+      padding: 2rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      max-width: 800px;
+      margin: auto;
+    }
+
+    h1 {
+      color: var(--primary-color);
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: 500;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.25rem;
+      border-radius: var(--border-radius);
+      border: 1px solid #ccc;
+    }
+
+    .btn {
+      margin-top: 1.5rem;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background-color: var(--primary-light);
+    }
+
+    #logo {
+      display: block;
+      margin: 0 auto 1rem;
+      width: 120px;
+    }
+
+    .success, .error {
+      margin-top: 1rem;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .success {
+      color: var(--success-color);
+    }
+
+    .error {
+      color: var(--danger-color);
+    }
+  </style>
+</head>
+<body>
+  <div class="form-card">
+    <img src="https://i.ibb.co/8nHBqsmb/T15logo.png" alt="Team15 Bank Logo" style="width: 180px;" />
+    <h1>Loan Application Form</h1>
+
+    <form id="applicationForm">
+      <input type="hidden" id="application_id" name="application_id">
+
+      <label>Full Name</label>
+      <input type="text" name="full_name" required>
+
+      <label>Date of Birth</label>
+      <input type="date" name="dob" required>
+
+      <label>Gender</label>
+      <select name="gender" required>
+        <option value="">Select...</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
+      </select>
+
+      <label>Email</label>
+      <input type="email" name="email" required>
+
+      <label>Phone</label>
+      <input type="tel" name="phone" required>
+
+      <label>Address</label>
+      <input type="text" name="address" required>
+
+      <label>No of Dependents</label>
+      <input type="number" name="no_of_dependents">
+
+      <label>Education* 
+        <select name="education" required>
+          <option value="">Select</option>
+          <option value=" Graduate">Graduate</option>
+          <option value=" Not Graduate">Not Graduate</option>
+        </select>
+      </label>
+
+      <label>Employment Type 
+        <select name="self_employed" required>
+          <option value="">Select</option>
+          <option value=" Yes">Self-Employed</option>
+          <option value=" No">Salaried</option>
+        </select>
+      </label>
+
+      <label>Income</label>
+      <input type="number" name="income_annum" required>
+
+      <label>Loan Amount</label>
+      <input type="number" name="loan_amount">
+
+      <label>Loan Term (months)</label>
+      <input type="number" name="loan_term">
+
+      <label>Residential Assets Value</label>
+      <input type="number" name="residential_assets_value" required>
+
+      <label>Commercial Assets Value</label>
+      <input type="number" name="commercial_assets_value" required>
+
+      <label>Luxury Assets Value</label>
+      <input type="number" name="luxury_assets_value" required>
+
+      <label>Bank Asset Value</label>
+      <input type="number" name="bank_asset_value"required>
+
+      <label>Job Years</label>
+      <input type="number" name="job_years">
+
+      <label>Existing Loans</label>
+      <input type="number" name="existing_loans">
+
+      <label>Credit Score</label>
+      <input type="number" name="credit_score"required>
+
+      <label>Loan Purpose</label>
+      <input type="text" name="loan_purpose">
+
+      <button type="submit" class="btn">Submit Application</button>
+      <button type="button" class="btn" onclick="downloadPDF()">Download PDF</button>
+
+      <div id="status" class=""></div>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById('applicationForm');
+    const statusEl = document.getElementById('status');
+
+    const generateAppID = () => 'APP-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+
+    form.application_id.value = generateAppID();
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const json = Object.fromEntries(formData.entries());
+
+      try {
+        const res = await google.script.run.withSuccessHandler(response => {
+          if (response.status === 'success') {
+            statusEl.className = 'success';
+            statusEl.textContent = response.message;
+          } else {
+            statusEl.className = 'error';
+            statusEl.textContent = response.message;
+          }
+        }).withFailureHandler(err => {
+          statusEl.className = 'error';
+          statusEl.textContent = 'Error submitting form.';
+        }).processForm(json);
+      } catch (err) {
+        statusEl.className = 'error';
+        statusEl.textContent = 'Submission failed.';
+      }
+    });
+
+    function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      const appID = form.application_id.value;
+      const date = new Date().toLocaleDateString();
+
+      doc.setFillColor(13, 71, 161);
+      doc.rect(0, 0, 210, 20, 'F');
+
+      doc.setTextColor(255);
+      doc.setFontSize(16);
+      doc.text("Team15 Bank Loan Application", 15, 12);
+
+      doc.setTextColor(0);
+      doc.setFontSize(11);
+      doc.text(`Application ID: ${appID}`, 15, 30);
+      doc.text(`Date: ${date}`, 150, 30);
+
+      let y = 40;
+      const marginLeft = 15;
+      const fields = [
+        'Full Name', 'Date of Birth', 'Gender', 'Email', 'Phone', 'Address',
+        'No of Dependents', 'Education', 'Employment', 'Income', 'Loan Amount',
+        'Loan Term', 'Residential Assets Value', 'Commercial Assets Value',
+        'Luxury Assets Value', 'Bank Asset Value', 'Job Years', 'Existing Loans',
+        'Credit Score', 'Loan Purpose'
+      ];
+
+      fields.forEach(field => {
+        const input = form.querySelector(`[name="${field.toLowerCase().replace(/ /g, '_')}"]`);
+        if (input) {
+          doc.text(`${field}: ${input.value}`, marginLeft, y);
+          y += 8;
+        }
+      });
+
+      doc.save(`${appID}_Loan_Application.pdf`);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Data Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .dashboard-title {
+            grid-column: span 2;
+            text-align: center;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        .chart-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            height: 400px;
+        }
+        .chart-title {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #34495e;
+        }
+        .data-table {
+            grid-column: span 2;
+            overflow-x: auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        .filters {
+            grid-column: span 2;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            min-width: 200px;
+        }
+        .filter-group label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        select, input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .key-metrics {
+            grid-column: span 2;
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .metric-card {
+            flex: 1;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            text-align: center;
+        }
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0;
+            color: #2980b9;
+        }
+        .metric-label {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        .tooltip {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100px;
+            font-weight: bold;
+            color: #3498db;
+        }
+        #fileInput {
+            display: none;
+        }
+        .file-upload {
+            display: inline-flex;
+            align-items: center;
+            background-color: #3498db;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .file-upload:hover {
+            background-color: #2980b9;
+        }
+        .file-name {
+            margin-left: 10px;
+            color: #555;
+        }
+        /* New approval indicator styles */
+        .approval-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        .approval-yes {
+            background-color: #2ecc71;
+        }
+        .approval-no {
+            background-color: #e74c3c;
+        }
+        /* Additional styles for sample data button */
+        .sample-data-btn {
+            background-color: #27ae60;
+        }
+        .sample-data-btn:hover {
+            background-color: #219653;
+        }
+        /* Progress indicator */
+        #progressContainer {
+            display: none;
+            margin-top: 10px;
+        }
+        progress {
+            width: 100%;
+            height: 10px;
+        }
+        /* Error message */
+        .error-message {
+            color: #e74c3c;
+            background-color: #fadbd8;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            display: none;
+        }
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+        }
+        .spinner {
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center; color: #2c3e50;">Loan Applicant Profile Dashboard</h1>
+    
+    <div class="filters">
+        <div class="filter-group">
+            <label for="fileInput" class="file-upload">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                    <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/>
+                </svg>
+                Upload Excel/CSV File
+            </label>
+            <input type="file" id="fileInput" accept=".xlsx,.xls,.csv">
+            <div id="progressContainer">
+                <progress id="uploadProgress" value="0" max="100"></progress>
+            </div>
+            <span id="fileName" class="file-name"></span>
+            <div id="errorMessage" class="error-message"></div>
+        </div>
+        <div class="filter-group">
+            <button id="useSampleData" class="sample-data-btn">Load Sample Data</button>
+        </div>
+        <div class="filter-group">
+            <label for="genderFilter">Gender:</label>
+            <select id="genderFilter">
+                <option value="all">All</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="educationFilter">Education:</label>
+            <select id="educationFilter">
+                <option value="all">All</option>
+                <option value="Graduate">Graduate</option>
+                <option value="Not Graduate">Not Graduate</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="loanPurposeFilter">Loan Purpose:</label>
+            <select id="loanPurposeFilter">
+                <option value="all">All</option>
+                <!-- These will be populated dynamically -->
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="approvalFilter">Predicted Approval:</label>
+            <select id="approvalFilter">
+                <option value="all">All</option>
+                <option value="1">Approved</option>
+                <option value="0">Rejected</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="creditScoreFilter">Min Credit Score:</label>
+            <input type="number" id="creditScoreFilter" min="300" max="900" value="300">
+        </div>
+        <div class="filter-group" style="justify-content: flex-end;">
+            <button id="applyFilters" style="margin-top: auto;">Apply Filters</button>
+        </div>
+    </div>
+
+    <div class="key-metrics">
+        <div class="metric-card">
+            <div class="metric-label">Total Applications</div>
+            <div id="totalApplications" class="metric-value">-</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Average Loan Amount</div>
+            <div id="avgLoanAmount" class="metric-value">-</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Average Income</div>
+            <div id="avgIncome" class="metric-value">-</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Average Credit Score</div>
+            <div id="avgCreditScore" class="metric-value">-</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Approval Rate</div>
+            <div id="approvalRate" class="metric-value">-</div>
+        </div>
+    </div>
+
+    <div class="dashboard-container">
+        <div class="chart-container">
+            <div class="chart-title">Age Distribution by Gender</div>
+            <canvas id="ageDistributionChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <div class="chart-title">Approval Probability Distribution</div>
+            <canvas id="approvalProbabilityChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <div class="chart-title">Job Experience vs Income</div>
+            <canvas id="jobIncomeChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <div class="chart-title">Asset Distribution by Approval Status</div>
+            <canvas id="assetDistributionChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <div class="chart-title">Credit Score vs Approval Probability</div>
+            <canvas id="creditScoreApprovalChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <div class="chart-title">Monthly Payment by Approval Status</div>
+            <canvas id="monthlyPaymentChart"></canvas>
+        </div>
+    </div>
+
+    <div class="data-table">
+        <h3>Loan Application Data</h3>
+        <div id="tableContainer"></div>
+    </div>
+
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <script>
+        // Global variables
+        let loanData = [];
+        let filteredData = [];
+        let charts = {};
+
+        // Format currency
+        const formatCurrency = (value) => {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 2
+            }).format(value);
+        };
+
+        // Format percentage
+        const formatPercentage = (value) => {
+            return new Intl.NumberFormat('en-US', {
+                style: 'percent',
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1
+            }).format(value / 100);
+        };
+
+        // Calculate age from DOB
+        const calculateAge = (dob) => {
+            // Check if dob is a date object
+            if (dob instanceof Date) {
+                const today = new Date();
+                let age = today.getFullYear() - dob.getFullYear();
+                const m = today.getMonth() - dob.getMonth();
+                if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+                    age--;
+                }
+                return age;
+            }
+            
+            // Handle string format (try to parse)
+            if (typeof dob === 'string') {
+                try {
+                    const date = new Date(dob);
+                    if (!isNaN(date.getTime())) {
+                        return calculateAge(date);
+                    }
+                } catch (e) {
+                    // Continue with other methods if date parsing fails
+                }
+            }
+            
+            // This is a simplified approximation for numeric formats or Excel dates
+            const dobNum = parseFloat(dob);
+            if (isNaN(dobNum)) return 30; // Default age if parsing fails
+            
+            // Try to interpret as Excel date (days since 1/1/1900)
+            if (dobNum > 1000 && dobNum < 50000) {
+                const excelEpoch = new Date(1900, 0, 1);
+                const daysSince = dobNum - 2; // Excel's bug: 1900 is not a leap year
+                const milliseconds = daysSince * 24 * 60 * 60 * 1000;
+                const date = new Date(excelEpoch.getTime() + milliseconds);
+                return calculateAge(date);
+            }
+            
+            return Math.round((40000 - dobNum) / 365.25);
+        };
+
+        // Process data function
+        const processData = (data) => {
+            // Handle potential empty or invalid rows
+            data = data.filter(row => {
+                return row && typeof row === 'object' && 
+                       (row['Full Name'] || row['Income'] || row['Loan Amount']);
+            });
+            
+            // Add calculated fields
+            data.forEach(row => {
+                // Convert to numbers (handle potential missing values gracefully)
+                row['Income'] = parseFloat(row['Income'] || 0);
+                row['Loan Amount'] = parseFloat(row['Loan Amount'] || 0);
+                row['Loan Term'] = parseFloat(row['Loan Term'] || 0);
+                row['Residential Assets Value'] = parseFloat(row['Residential Assets Value'] || 0);
+                row['Commercial Assets Value'] = parseFloat(row['Commercial Assets Value'] || 0);
+                row['Luxury Assets Value'] = parseFloat(row['Luxury Assets Value'] || 0);
+                row['Bank Asset Value'] = parseFloat(row['Bank Asset Value'] || 0);
+                row['Job Years'] = parseFloat(row['Job Years'] || 0);
+                row['Credit Score'] = parseFloat(row['Credit Score'] || 0);
+                row['No of dependents'] = parseInt(row['No of dependents'] || 0);
+                
+                // Handle prediction fields
+                row['Predicted_Approval'] = row['Predicted_Approval'] !== undefined ? 
+                    (typeof row['Predicted_Approval'] === 'string' ? 
+                        parseInt(row['Predicted_Approval']) || 0 : 
+                        row['Predicted_Approval'] ? 1 : 0) : 0;
+                
+                row['Approval_Probability'] = parseFloat(row['Approval_Probability'] || 0);
+                row['Approval_Probability_Pct'] = parseFloat(row['Approval_Probability_Pct'] || 0);
+                
+                // If the percentage is between 0-1, multiply by 100
+                if (row['Approval_Probability_Pct'] > 0 && row['Approval_Probability_Pct'] < 1) {
+                    row['Approval_Probability_Pct'] *= 100;
+                }
+                
+                // Calculate age - handle various date formats
+                row['Age'] = calculateAge(row['Date of Birth']);
+                
+                // Calculate total assets
+                row['Total Assets'] = row['Residential Assets Value'] + row['Commercial Assets Value'] +
+                                   row['Luxury Assets Value'] + row['Bank Asset Value'];
+                
+                // Calculate Loan-to-Income ratio
+                row['Loan-to-Income Ratio'] = row['Income'] > 0 ? row['Loan Amount'] / row['Income'] : 0;
+                
+                // Calculate estimated monthly payment (simple calculation, not accounting for interest)
+                row['Estimated Monthly Payment'] = (row['Loan Term'] > 0 && row['Loan Amount'] > 0) ? 
+                    row['Loan Amount'] / (row['Loan Term'] * 12) : 0;
+                
+                // Calculate Debt-to-Income ratio
+                row['DTI Ratio'] = row['Income'] > 0 ? (row['Estimated Monthly Payment'] / (row['Income'] / 12)) * 100 : 0;
+            });
+            
+            return data;
+        };
+
+        // Show error message
+        const showError = (message) => {
+            const errorElement = document.getElementById('errorMessage');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+            setTimeout(() => {
+                errorElement.style.display = 'none';
+            }, 5000);
+        };
+
+        // Show loading spinner
+        const showLoading = (show = true) => {
+            document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
+        };
+
+        // Apply filters function
+        const applyFilters = () => {
+            const gender = document.getElementById('genderFilter').value;
+            const education = document.getElementById('educationFilter').value;
+            const loanPurpose = document.getElementById('loanPurposeFilter').value;
+            const approval = document.getElementById('approvalFilter').value;
+            const minCreditScore = parseInt(document.getElementById('creditScoreFilter').value);
+            
+            filteredData = loanData.filter(row => {
+                return (gender === 'all' || row['Gender'] === gender) &&
+                       (education === 'all' || row['Education'] === education) &&
+                       (loanPurpose === 'all' || row['Loan Purpose'] === loanPurpose) &&
+                       (approval === 'all' || row['Predicted_Approval'].toString() === approval) &&
+                       (isNaN(minCreditScore) || row['Credit Score'] >= minCreditScore);
+            });
+            
+            updateDashboard();
+        };
+
+        // Update key metrics
+        const updateKeyMetrics = () => {
+            document.getElementById('totalApplications').textContent = filteredData.length;
+            
+            if (filteredData.length > 0) {
+                const avgLoanAmount = filteredData.reduce((sum, row) => sum + row['Loan Amount'], 0) / filteredData.length;
+                document.getElementById('avgLoanAmount').textContent = formatCurrency(avgLoanAmount);
+                
+                const avgIncome = filteredData.reduce((sum, row) => sum + row['Income'], 0) / filteredData.length;
+                document.getElementById('avgIncome').textContent = formatCurrency(avgIncome);
+                
+                const avgCreditScore = filteredData.reduce((sum, row) => sum + row['Credit Score'], 0) / filteredData.length;
+                document.getElementById('avgCreditScore').textContent = avgCreditScore.toFixed(1);
+                
+                const approvedCount = filteredData.filter(row => row['Predicted_Approval'] === 1).length;
+                const approvalRate = (approvedCount / filteredData.length) * 100;
+                document.getElementById('approvalRate').textContent = approvalRate.toFixed(1) + '%';
+            } else {
+                document.getElementById('avgLoanAmount').textContent = '-';
+                document.getElementById('avgIncome').textContent = '-';
+                document.getElementById('avgCreditScore').textContent = '-';
+                document.getElementById('approvalRate').textContent = '-';
+            }
+        };
+
+        // Create or update age distribution chart
+        const updateAgeDistributionChart = () => {
+            const ctx = document.getElementById('ageDistributionChart').getContext('2d');
+            
+            // Prepare data
+            const maleAges = filteredData.filter(row => row['Gender'] === 'Male').map(row => row['Age']);
+            const femaleAges = filteredData.filter(row => row['Gender'] === 'Female').map(row => row['Age']);
+            
+            // Create age bins
+            const bins = [20, 30, 40, 50, 60, 70, 80];
+            
+            // Count ages in each bin
+            const maleAgeCounts = Array(bins.length).fill(0);
+            const femaleAgeCounts = Array(bins.length).fill(0);
+            
+            maleAges.forEach(age => {
+                for (let i = 0; i < bins.length; i++) {
+                    if (age <= bins[i]) {
+                        maleAgeCounts[i]++;
+                        break;
+                    }
+                }
+            });
+            
+            femaleAges.forEach(age => {
+                for (let i = 0; i < bins.length; i++) {
+                    if (age <= bins[i]) {
+                        femaleAgeCounts[i]++;
+                        break;
+                    }
+                }
+            });
+            
+            // Create chart labels
+            const labels = bins.map((bin, i) => {
+                if (i === 0) {
+                    return `≤ ${bin}`;
+                } else {
+                    return `${bins[i-1]+1} - ${bin}`;
+                }
+            });
+            
+            // Create or update chart
+            if (charts.ageDistribution) {
+                charts.ageDistribution.data.labels = labels;
+                charts.ageDistribution.data.datasets[0].data = maleAgeCounts;
+                charts.ageDistribution.data.datasets[1].data = femaleAgeCounts;
+                charts.ageDistribution.update();
+            } else {
+                charts.ageDistribution = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Male',
+                                data: maleAgeCounts,
+                                backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Female',
+                                data: femaleAgeCounts,
+                                backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                                borderColor: 'rgba(255, 99, 132, 1)',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Number of Applicants'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Age Range'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        };
+
+        // Create or update approval probability chart
+        const updateApprovalProbabilityChart = () => {
+            const ctx = document.getElementById('approvalProbabilityChart').getContext('2d');
+            
+            // Create probability bins
+            const bins = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+            const binLabels = bins.map((bin, i) => {
+                if (i === bins.length - 1) return '';
+                return `${bin}%-${bins[i+1]-1}%`;
+            });
+            binLabels.pop();
+            
+            // Count probabilities in each bin
+            const probCounts = Array(bins.length - 1).fill(0);
+            
+            filteredData.forEach(row => {
+                const prob = parseFloat(row['Approval_Probability_Pct'] || 0);
+                for (let i = 0; i < bins.length - 1; i++) {
+                    if (prob >= bins[i] && prob < bins[i+1]) {
+                        probCounts[i]++;
+                        break;
+                    }
+                }
+            });
+            
+            // Calculate approval color gradient
+            const backgroundColors = bins.slice(0, -1).map((bin, i) => {
+                const r = Math.round(255 - (bin * 2.2));
+                const g = Math.round(bin * 2);
+                return `rgba(${r}, ${g}, 100, 0.7)`;
+            });
+            
+            // Create or update chart
+            if (charts.approvalProbability) {
+                charts.approvalProbability.data.labels = binLabels;
+                charts.approvalProbability.data.datasets[0].data = probCounts;
+                charts.approvalProbability.data.datasets[0].backgroundColor = backgroundColors;
+                charts.approvalProbability.update();
+            } else {
+                charts.approvalProbability = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: binLabels,
+                        datasets: [{
+                            label: 'Number of Applications',
+                            data: probCounts,
+                            backgroundColor: backgroundColors,
+                            borderColor: backgroundColors.map(color => color.replace('0.7', '1')),
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Number of Applications'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Approval Probability'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        };
+
+        // Create or update job vs income chart
+        const updateJobIncomeChart = () => {
+            const ctx = document.getElementById('jobIncomeChart').getContext('2d');
+            
+            // Prepare data
+            const data = filteredData.map(row => ({
+                x: row['Job Years'],
+                y: row['Income'],
+                r: Math.max(5, Math.min(20, row['Loan Amount'] / 5000)),
+                creditScore: row['Credit Score'],
+                approval: row['Predicted_Approval']
+            }));
+            
+            // Create color for approved/rejected
+            const getColor = (approval) => {
+                return approval === 1 ? 'rgba(46, 204, 113, 0.7)' : 'rgba(231, 76, 60, 0.7)';
+            };
+            
+            // Create or update chart
+            if (charts.jobIncome) {
+                charts.jobIncome.data.datasets[0].data = data;
+                charts.jobIncome.data.datasets[0].backgroundColor = data.map(d => getColor(d.approval));
+                charts.jobIncome.update();
+            } else {
+                charts.jobIncome = new Chart(ctx, {
+                    type: 'bubble',
+                    data: {
+                        datasets: [{
+                            label: 'Job Experience vs Income',
+                            data: data,
+                            backgroundColor: data.map(d => getColor(d.approval)),
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Income ($)'
+                                },
+                                ticks: {
+                                    callback: function(value) {
+                                        return '$' + value.toLocaleString();
+                                    }
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+text: 'Years of Job Experience'
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const approval = context.raw.approval === 1 ? 'Approved' : 'Rejected';
+                                        return [
+                                            `Years: ${context.raw.x}`,
+                                            `Income: ${formatCurrency(context.raw.y)}`,
+                                            `Loan Amount: ${formatCurrency(context.raw.r * 5000)}`,
+                                            `Credit Score: ${context.raw.creditScore}`,
+                                            `Status: ${approval}`
+                                        ];
+                                    }
+                                }
+                            },
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            }
+        };
+
+        // Create or update asset distribution chart
+        const updateAssetDistributionChart = () => {
+            const ctx = document.getElementById('assetDistributionChart').getContext('2d');
+            
+            // Group data by approval status
+            const approved = filteredData.filter(row => row['Predicted_Approval'] === 1);
+            const rejected = filteredData.filter(row => row['Predicted_Approval'] === 0);
+            
+            // Calculate average assets for each group
+            const calcAvgAssets = (data) => {
+                if (data.length === 0) return [0, 0, 0, 0];
+                return [
+                    data.reduce((sum, row) => sum + row['Residential Assets Value'], 0) / data.length,
+                    data.reduce((sum, row) => sum + row['Commercial Assets Value'], 0) / data.length,
+                    data.reduce((sum, row) => sum + row['Luxury Assets Value'], 0) / data.length,
+                    data.reduce((sum, row) => sum + row['Bank Asset Value'], 0) / data.length
+                ];
+            };
+            
+            const approvedAssets = calcAvgAssets(approved);
+            const rejectedAssets = calcAvgAssets(rejected);
+            
+            // Create or update chart
+            if (charts.assetDistribution) {
+                charts.assetDistribution.data.datasets[0].data = approvedAssets;
+                charts.assetDistribution.data.datasets[1].data = rejectedAssets;
+                charts.assetDistribution.update();
+            } else {
+                charts.assetDistribution = new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['Residential', 'Commercial', 'Luxury', 'Bank'],
+                        datasets: [
+                            {
+                                label: 'Approved',
+                                data: approvedAssets,
+                                backgroundColor: 'rgba(46, 204, 113, 0.2)',
+                                borderColor: 'rgba(46, 204, 113, 1)',
+                                pointBackgroundColor: 'rgba(46, 204, 113, 1)',
+                                pointBorderColor: '#fff',
+                                pointHoverBackgroundColor: '#fff',
+                                pointHoverBorderColor: 'rgba(46, 204, 113, 1)'
+                            },
+                            {
+                                label: 'Rejected',
+                                data: rejectedAssets,
+                                backgroundColor: 'rgba(231, 76, 60, 0.2)',
+                                borderColor: 'rgba(231, 76, 60, 1)',
+                                pointBackgroundColor: 'rgba(231, 76, 60, 1)',
+                                pointBorderColor: '#fff',
+                                pointHoverBackgroundColor: '#fff',
+                                pointHoverBorderColor: 'rgba(231, 76, 60, 1)'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                angleLines: {
+                                    display: true
+                                },
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+        };
+
+        // Create or update credit score vs approval chart
+        const updateCreditScoreApprovalChart = () => {
+            const ctx = document.getElementById('creditScoreApprovalChart').getContext('2d');
+            
+            // Prepare data
+            const data = filteredData.map(row => ({
+                x: row['Credit Score'],
+                y: row['Approval_Probability_Pct'],
+                approval: row['Predicted_Approval']
+            }));
+            
+            // Create color for approved/rejected
+            const getColor = (approval) => {
+                return approval === 1 ? 'rgba(46, 204, 113, 0.7)' : 'rgba(231, 76, 60, 0.7)';
+            };
+            
+            // Create or update chart
+            if (charts.creditScoreApproval) {
+                charts.creditScoreApproval.data.datasets[0].data = data;
+                charts.creditScoreApproval.data.datasets[0].backgroundColor = data.map(d => getColor(d.approval));
+                charts.creditScoreApproval.update();
+            } else {
+                charts.creditScoreApproval = new Chart(ctx, {
+                    type: 'scatter',
+                    data: {
+                        datasets: [{
+                            label: 'Credit Score vs Approval Probability',
+                            data: data,
+                            backgroundColor: data.map(d => getColor(d.approval)),
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                title: {
+                                    display: true,
+                                    text: 'Approval Probability (%)'
+                                }
+                            },
+                            x: {
+                                min: 300,
+                                max: 900,
+                                title: {
+                                    display: true,
+                                    text: 'Credit Score'
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const approval = context.raw.approval === 1 ? 'Approved' : 'Rejected';
+                                        return [
+                                            `Credit Score: ${context.raw.x}`,
+                                            `Approval Probability: ${context.raw.y.toFixed(1)}%`,
+                                            `Status: ${approval}`
+                                        ];
+                                    }
+                                }
+                            },
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            }
+        };
+
+        // Create or update monthly payment chart
+        const updateMonthlyPaymentChart = () => {
+            const ctx = document.getElementById('monthlyPaymentChart').getContext('2d');
+            
+            // Group data by approval status
+            const approved = filteredData.filter(row => row['Predicted_Approval'] === 1);
+            const rejected = filteredData.filter(row => row['Predicted_Approval'] === 0);
+            
+            // Create payment bins
+            const bins = [0, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000];
+            
+            // Count payments in each bin
+            const countInBins = (data, bins) => {
+                const counts = Array(bins.length - 1).fill(0);
+                data.forEach(row => {
+                    const payment = row['Estimated Monthly Payment'];
+                    for (let i = 0; i < bins.length - 1; i++) {
+                        if (payment >= bins[i] && payment < bins[i+1]) {
+                            counts[i]++;
+                            break;
+                        } else if (i === bins.length - 2 && payment >= bins[i+1]) {
+                            counts[i]++;
+                            break;
+                        }
+                    }
+                });
+                return counts;
+            };
+            
+            const approvedCounts = countInBins(approved, bins);
+            const rejectedCounts = countInBins(rejected, bins);
+            
+            // Create chart labels
+            const labels = bins.map((bin, i) => {
+                if (i === bins.length - 1) return '';
+                if (i === bins.length - 2) return `$${bins[i]}+`;
+                return `$${bins[i]}-$${bins[i+1]-1}`;
+            });
+            labels.pop();
+            
+            // Create or update chart
+            if (charts.monthlyPayment) {
+                charts.monthlyPayment.data.labels = labels;
+                charts.monthlyPayment.data.datasets[0].data = approvedCounts;
+                charts.monthlyPayment.data.datasets[1].data = rejectedCounts;
+                charts.monthlyPayment.update();
+            } else {
+                charts.monthlyPayment = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Approved',
+                                data: approvedCounts,
+                                backgroundColor: 'rgba(46, 204, 113, 0.7)',
+                                borderColor: 'rgba(46, 204, 113, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Rejected',
+                                data: rejectedCounts,
+                                backgroundColor: 'rgba(231, 76, 60, 0.7)',
+                                borderColor: 'rgba(231, 76, 60, 1)',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Number of Applications'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Estimated Monthly Payment'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        };
+
+        // Update data table
+        const updateDataTable = () => {
+            const tableContainer = document.getElementById('tableContainer');
+            
+            if (filteredData.length === 0) {
+                tableContainer.innerHTML = '<p>No data available</p>';
+                return;
+            }
+            
+            // Get column headers
+            const columns = ['Full Name', 'Gender', 'Age', 'Education', 'Income', 'Job Years', 
+                           'Loan Amount', 'Loan Term', 'Loan Purpose', 'Credit Score', 
+                           'Predicted_Approval', 'Approval_Probability_Pct'];
+            
+            // Create table
+            let tableHTML = '<table><thead><tr>';
+            columns.forEach(col => {
+                tableHTML += `<th>${col}</th>`;
+            });
+            tableHTML += '</tr></thead><tbody>';
+            
+            // Add data rows
+            filteredData.forEach(row => {
+                tableHTML += '<tr>';
+                columns.forEach(col => {
+                    let value = row[col];
+                    
+                    // Format specific columns
+                    if (col === 'Income' || col === 'Loan Amount') {
+                        value = formatCurrency(value);
+                    } else if (col === 'Approval_Probability_Pct') {
+                        value = value.toFixed(1) + '%';
+                    } else if (col === 'Predicted_Approval') {
+                        const color = value === 1 ? 'approval-yes' : 'approval-no';
+                        value = `<span class="approval-indicator ${color}"></span>${value === 1 ? 'Yes' : 'No'}`;
+                    }
+                    
+                    tableHTML += `<td>${value !== undefined ? value : ''}</td>`;
+                });
+                tableHTML += '</tr>';
+            });
+            
+            tableHTML += '</tbody></table>';
+            tableContainer.innerHTML = tableHTML;
+        };
+
+        // Update all charts and metrics
+        const updateDashboard = () => {
+            updateKeyMetrics();
+            updateAgeDistributionChart();
+            updateApprovalProbabilityChart();
+            updateJobIncomeChart();
+            updateAssetDistributionChart();
+            updateCreditScoreApprovalChart();
+            updateMonthlyPaymentChart();
+            updateDataTable();
+        };
+
+        // Update loan purpose filter options
+        const updateLoanPurposeOptions = () => {
+            const loanPurposes = [...new Set(loanData.map(row => row['Loan Purpose']))].filter(Boolean).sort();
+            const loanPurposeFilter = document.getElementById('loanPurposeFilter');
+            
+            // Clear existing options except "All"
+            while (loanPurposeFilter.options.length > 1) {
+                loanPurposeFilter.remove(1);
+            }
+            
+            // Add new options
+            loanPurposes.forEach(purpose => {
+                const option = document.createElement('option');
+                option.value = purpose;
+                option.textContent = purpose;
+                loanPurposeFilter.appendChild(option);
+            });
+        };
+
+        // Parse Excel/CSV file
+        const parseExcelFile = (file) => {
+            showLoading(true);
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    let workbook;
+                    
+                    if (file.name.endsWith('.csv')) {
+                        // For CSV files
+                        const csvText = new TextDecoder().decode(data);
+                        const lines = csvText.split('\n');
+                        
+                        if (lines.length === 0) {
+                            throw new Error("CSV file is empty");
+                        }
+                        
+                        const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+                        
+                        const jsonData = [];
+                        for (let i = 1; i < lines.length; i++) {
+                            if (!lines[i].trim()) continue;
+                            
+                            const values = lines[i].split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+                            const obj = {};
+                            
+                            headers.forEach((header, index) => {
+                                obj[header] = values[index] || '';
+                            });
+                            
+                            jsonData.push(obj);
+                        }
+                        
+                        loanData = processData(jsonData);
+                    } else {
+                        // For Excel files
+                        workbook = XLSX.read(data, { type: 'array' });
+                        
+                        // Get first sheet
+                        const firstSheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[firstSheetName];
+                        
+                        // Convert to JSON
+                        const jsonData = XLSX.utils.sheet_to_json(worksheet, { raw: false });
+                        loanData = processData(jsonData);
+                    }
+                    
+                    // Apply initial filters
+                    filteredData = [...loanData];
+                    
+                    // Update UI
+                    updateLoanPurposeOptions();
+                    updateDashboard();
+                    
+                    showLoading(false);
+                } catch (error) {
+                    console.error('Error parsing file:', error);
+                    showError('Error parsing file. Please check the file format and try again.');
+                    showLoading(false);
+                }
+            };
+            
+            reader.onerror = function() {
+                showError('Error reading file. Please try again.');
+                showLoading(false);
+            };
+            
+            reader.readAsArrayBuffer(file);
+        };
+
+        // Generate sample data
+        const generateSampleData = () => {
+            const sampleSize = 100;
+            const loanPurposes = ['Home Purchase', 'Business', 'Education', 'Vehicle', 'Personal', 'Debt Consolidation', 'Medical', 'Home Improvement'];
+            const sample = [];
+            
+            for (let i = 0; i < sampleSize; i++) {
+                const gender = Math.random() > 0.5 ? 'Male' : 'Female';
+                const age = Math.floor(Math.random() * 50) + 20; // 20-70
+                const education = Math.random() > 0.6 ? 'Graduate' : 'Not Graduate';
+                const income = Math.floor(Math.random() * 90000) + 30000; // 30k-120k
+                const jobYears = Math.floor(Math.random() * 20) + 1; // 1-20
+                const loanAmount = Math.floor(Math.random() * 150000) + 10000; // 10k-160k
+                const loanTerm = Math.floor(Math.random() * 5) + 1; // 1-5 years
+                const creditScore = Math.floor(Math.random() * 400) + 400; // 400-800
+                const loanPurpose = loanPurposes[Math.floor(Math.random() * loanPurposes.length)];
+                
+                // Assets
+                const resAssets = Math.floor(Math.random() * 200000);
+                const comAssets = Math.floor(Math.random() * 100000);
+                const luxAssets = Math.floor(Math.random() * 50000);
+                const bankAssets = Math.floor(Math.random() * 100000);
+                
+                // Generate approval probability (higher credit scores more likely to be approved)
+                let approvalProbability = (creditScore - 400) / 4; // 0-100
+                
+                // Adjust based on income-to-loan ratio
+                const incomeToLoanRatio = income / loanAmount;
+                approvalProbability += (incomeToLoanRatio * 20);
+                
+                // Adjust based on assets
+                const totalAssets = resAssets + comAssets + luxAssets + bankAssets;
+                if (totalAssets > loanAmount) {
+                    approvalProbability += 15;
+                }
+                
+                // Cap at 0-100
+                approvalProbability = Math.min(100, Math.max(0, approvalProbability));
+                
+                // Determine approval status
+                const predicted = approvalProbability >= 50 ? 1 : 0;
+                
+                // Calculate DOB based on age
+                const today = new Date();
+                const dobYear = today.getFullYear() - age;
+                const dobMonth = Math.floor(Math.random() * 12);
+                const dobDay = Math.floor(Math.random() * 28) + 1;
+                const dob = new Date(dobYear, dobMonth, dobDay);
+                const excelDate = (dob - new Date(1900, 0, 1)) / (24 * 60 * 60 * 1000) + 2; // Excel date format
+                
+                sample.push({
+                    'Full Name': `Person ${i+1}`,
+                    'Date of Birth': excelDate,
+                    'Gender': gender,
+                    'Email': `person${i+1}@example.com`,
+                    'Phone': `(555) 123-${String(1000 + i).slice(-4)}`,
+                    'Address': `${i+1} Main St, City`,
+                    'No of dependents': Math.floor(Math.random() * 4),
+                    'Education': education,
+                    'Employment': Math.random() > 0.1 ? 'Employed' : 'Self-employed',
+                    'Income': income,
+                    'Loan Amount': loanAmount,
+                    'Loan Term': loanTerm,
+                    'Residential Assets Value': resAssets,
+                    'Commercial Assets Value': comAssets,
+                    'Luxury Assets Value': luxAssets,
+                    'Bank Asset Value': bankAssets,
+                    'Job Years': jobYears,
+                    'Existing Loans': Math.floor(Math.random() * 3),
+                    'Credit Score': creditScore,
+                    'Loan Purpose': loanPurpose,
+                    'Application ID': `APP-${String(1000 + i).slice(-4)}`,
+                    'Predicted_Approval': predicted,
+                    'Approval_Probability': approvalProbability / 100,
+                    'Approval_Probability_Pct': approvalProbability
+                });
+            }
+            
+            return sample;
+        };
+
+        // Event listeners
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            if (!this.files || this.files.length === 0) return;
+            
+            const file = this.files[0];
+            document.getElementById('fileName').textContent = file.name;
+            
+            // Check file extension
+            const validExtensions = ['.xlsx', '.xls', '.csv'];
+            const fileExt = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+            
+            if (!validExtensions.includes(fileExt)) {
+                showError('Invalid file type. Please upload Excel (.xlsx, .xls) or CSV (.csv) file.');
+                return;
+            }
+            
+            // Parse file
+            parseExcelFile(file);
+        });
+
+        document.getElementById('useSampleData').addEventListener('click', function() {
+            showLoading(true);
+            
+            // Generate sample data
+            setTimeout(() => {
+                loanData = processData(generateSampleData());
+                filteredData = [...loanData];
+                
+                // Update UI
+                updateLoanPurposeOptions();
+                updateDashboard();
+                
+                document.getElementById('fileName').textContent = 'Sample Data';
+                showLoading(false);
+            }, 500);
+        });
+
+        document.getElementById('applyFilters').addEventListener('click', applyFilters);
+
+        // Initialize with sample data
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                document.getElementById('useSampleData').click();
+            }, 500);
+        });
+    </script>
+</body>
+</html>
+
+                                    
