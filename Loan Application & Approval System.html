@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Loan Application & Approval System | John Carl Tagbor</title>
+    <style>
+        :root {
+            --primary: #2a4365;
+            --secondary: #3182ce;
+            --accent: #4299e1;
+            --success: #38a169;
+            --warning: #ed8936;
+            --danger: #e53e3e;
+            --light: #ebf8ff;
+            --dark: #1a202c;
+            --text: #2d3748;
+            --text-light: #718096;
+            --bg: #f7fafc;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text);
+            background-color: var(--bg);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .hero {
+            background: var(--gradient);
+            color: white;
+            padding: 4rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="80" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="60" r="1" fill="rgba(255,255,255,0.1)"/></svg>');
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            100% { transform: translateY(-100px); }
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .hero-badges {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .badge {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Navigation */
+        .nav {
+            background: var(--dark);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            padding: 1rem 1.5rem;
+            font-weight: 500;
+            transition: var(--transition);
+            border-bottom: 3px solid transparent;
+        }
+
+        .nav-link:hover {
+            border-bottom: 3px solid var(--accent);
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        /* Sections */
+        .section {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--light);
+            padding-bottom: 1rem;
+        }
+
+        .section-icon {
+            font-size: 2rem;
+            margin-right: 1rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h2 {
+            color: var(--primary);
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .section p {
+            margin-bottom: 1rem;
+            color: var(--text);
+            font-size: 1.1rem;
+        }
+
+        /* Quick Access Buttons */
+        .quick-access {
+            background: var(--gradient);
+            color: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .quick-access h2 {
+            color: white;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .access-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: var(--transition);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .access-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-icon {
+            font-size: 1.5rem;
+        }
+
+        /* Code Sections */
+        .code-section {
+            background: var(--dark);
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            border: 1px solid #4a5568;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #4a5568;
+        }
+
+        .code-title {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .code-language {
+            background: var(--primary);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .metric-card {
+            background: var(--light);
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        /* Feature List */
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .feature-item {
+            background: var(--light);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .feature-title {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Back to Portfolio */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            color: var(--secondary);
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: var(--transition);
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+            transform: translateX(-5px);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .button-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .section {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>🤖 AI-Powered Loan Application & Approval System</h1>
+            <p class="hero-subtitle">Revolutionizing loan processing with machine learning and intelligent automation</p>
+            <div class="hero-badges">
+                <span class="badge">Machine Learning</span>
+                <span class="badge">Python</span>
+                <span class="badge">Random Forest</span>
+                <span class="badge">98% Accuracy</span>
+                <span class="badge">Real-time Processing</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="#overview" class="nav-link">Overview</a>
+            <a href="#access" class="nav-link">Quick Access</a>
+            <a href="#model" class="nav-link">ML Model</a>
+            <a href="#pipeline" class="nav-link">Pipeline</a>
+            <a href="#deliverables" class="nav-link">Deliverables</a>
+        </div>
+    </nav>
+
+    <!-- Back to Portfolio -->
+    <div class="container">
+        <a href="index.html" class="back-link">
+            ← Back to Portfolio
+        </a>
+    </div>
+
+    <!-- Quick Access Section -->
+    <section id="access" class="quick-access">
+        <h2>🚀 Quick Access</h2>
+        <div class="button-grid">
+            <a href="https://script.google.com/macros/s/AKfycby2SsZ1k9NDGLgtGwHcbn6EhHlDICunmO-n9LS2GBy1VmtwUA7WYdUmLXMZbMnTsvDtPg/exec" class="access-btn" target="_blank">
+                <span class="btn-icon">📝</span>
+                Application Form
+            </a>
+            <a href="https://github.com/jctagbor/loan-system/blob/main/Loan%20Application%20Admin%20Panel10.html" class="access-btn" target="_blank">
+                <span class="btn-icon">👨‍💼</span>
+                Admin Panel
+            </a>
+            <a href="https://github.com/jctagbor/loan-system/blob/main/Admin%20Dashboard.html" class="access-btn" target="_blank">
+                <span class="btn-icon">📊</span>
+                Analytics Dashboard
+            </a>
+            <a href="https://colab.research.google.com/drive/1sAhj8-EJkGaqAEJHSCOYOLIwdpAONp6A" class="access-btn" target="_blank">
+                <span class="btn-icon">🐍</span>
+                View Model Code
+            </a>
+        </div>
+    </section>
+
+    <div class="container">
+        <!-- Overview Section -->
+        <section id="overview" class="section">
+            <div class="section-header">
+                <span class="section-icon">🔍</span>
+                <h2>Project Overview</h2>
+            </div>
+            <p>Traditional loan approval processes in many financial institutions suffer from significant gaps including lack of transparency, inconsistent decision-making, and inability to adapt to nuanced applicant profiles. This project addresses these challenges by developing an intelligent, automated loan application and approval system.</p>
+            
+            <p>The system leverages machine learning to provide transparent, consistent, and explainable loan decisions while offering comprehensive insights into approval or denial reasoning. Our solution transforms the traditional lending process into a data-driven, efficient, and fair system.</p>
+
+            <div class="feature-list">
+                <div class="feature-item">
+                    <div class="feature-title">🌐 Web-based Application Interface</div>
+                    <p>Intuitive, user-friendly application form for loan applicants with real-time validation and guidance.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-title">🗄️ Integrated Data Management</div>
+                    <p>Google Sheets integration for seamless data collection and storage with automated synchronization.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-title">🤖 AI-Powered Decision Engine</div>
+                    <p>Advanced machine learning model with 98% accuracy for reliable loan approval predictions.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-title">📱 Administrative Dashboard</div>
+                    <p>Comprehensive admin panel for reviewing applications, managing decisions, and monitoring portfolio performance.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-title">📈 Real-time Analytics</div>
+                    <p>Interactive visualizations and insights for executive decision-making and risk management.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-title">🔍 Explainable AI</div>
+                    <p>Transparent decision-making with detailed explanations for approvals and denials based on feature importance.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Model Design Section -->
+        <section id="model" class="section">
+            <div class="section-header">
+                <span class="section-icon">🧠</span>
+                <h2>Machine Learning Model Design</h2>
+            </div>
+            
+            <p>The core innovation of this project lies in our sophisticated machine learning model that predicts loan approval outcomes with exceptional accuracy. Built using a comprehensive dataset from Kaggle, our model incorporates financial and personal attributes to make informed lending decisions.</p>
+
+            <h3>🎯 Model Performance Metrics</h3>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-value">98%</div>
+                    <div class="metric-label">Overall Accuracy</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">0.998</div>
+                    <div class="metric-label">ROC-AUC Score</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">19</div>
+                    <div class="metric-label">Misclassifications (out of 854)</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">80%</div>
+                    <div class="metric-label">CIBIL Score Importance</div>
+                </div>
+            </div>
+
+            <h3>🔧 Technical Implementation</h3>
+            <p>Our model employs a <strong>Random Forest Classifier</strong> with 100 estimators, chosen for its excellent performance with structured data and mixed feature types. The model provides built-in feature importance metrics, crucial for explaining decisions to stakeholders.</p>
+
+            <div class="code-section">
+                <div class="code-header">
+                    <span class="code-title">Model Training & Evaluation</span>
+                    <span class="code-language">Python</span>
+                </div>
+                <pre># Core model implementation
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report, confusion_matrix, roc_auc_score
+
+# Model training with optimized parameters
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+model.fit(X_train, y_train)
+
+# Comprehensive evaluation
+y_pred = model.predict(X_test)
+print("Classification Report:\n", classification_report(y_test, y_pred))
+print("ROC-AUC Score:", roc_auc_score(y_test, model.predict_proba(X_test)[:, 1]))
+
+# Feature importance for explainability
+feature_importance = pd.DataFrame({
+    'feature': X.columns,
+    'importance': model.feature_importances_
+}).sort_values('importance', ascending=False)</pre>
+            </div>
+
+            <h3>💡 Key Insights & Explainability</h3>
+            <p>Our model's feature importance analysis reveals that <strong>CIBIL score dominates decision-making (80%+ influence)</strong>, followed by loan term, amount, income, and asset values. This aligns perfectly with real-world lending practices, where creditworthiness and repayment capacity are paramount.</p>
+        </section>
+
+        <!-- Pipeline Section -->
+        <section id="pipeline" class="section">
+            <div class="section-header">
+                <span class="section-icon">⚙️</span>
+                <h2>Automated Processing Pipeline</h2>
+            </div>
+            
+            <p>Our sophisticated backend pipeline seamlessly integrates data collection, processing, and prediction generation. The system automatically loads new loan applications, processes them through our trained model, and generates comprehensive results with approval probabilities.</p>
+
+            <div class="code-section">
+                <div class="code-header">
+                    <span class="code-title">Complete Prediction Pipeline</span>
+                    <span class="code-language">Python</span>
+                </div>
+                <pre>import pandas as pd
+import joblib
+from google.colab import drive, auth
+import gspread
+from google.auth import default
+
+def predict_loan_approval():
+    # Mount Google Drive and load trained model
+    drive.mount('/content/drive')
+    model = joblib.load('/content/drive/MyDrive/loan_model.pkl')
+    
+    # Load application data from Google Sheets
+    sheet_id = '1VGRF8daNSc3RiED0GqIzNjLjt1XLYHT7lux5x83s0Dc'
+    sheet_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/gviz/tq?tqx=out:csv"
+    new_data = pd.read_csv(sheet_url)
+    
+    # Data preprocessing and feature mapping
+    column_mapping = {
+        'No of dependents': 'no_of_dependents',
+        'Education': 'education',
+        'Employment': 'self_employed',
+        'Income': 'income_annum',
+        'Loan Amount': 'loan_amount',
+        'Loan Term': 'loan_term',
+        'Credit Score': 'cibil_score'
+        # ... additional mappings
+    }
+    
+    processed_data = new_data.rename(columns=column_mapping)
+    
+    # Intelligent data type conversion
+    processed_data['education'] = processed_data['education'].map({
+        'Graduate': 1, 'Not Graduate': 0
+    }).fillna(0)
+    
+    processed_data['self_employed'] = processed_data['self_employed'].map({
+        'Yes': 1, 'No': 0
+    }).fillna(0)
+    
+    # Generate predictions with probabilities
+    predictions = model.predict(processed_data)
+    prediction_probs = model.predict_proba(processed_data)[:, 1]
+    
+    # Enhance results with detailed insights
+    new_data['Predicted_Approval'] = ['Approved' if x == 1 else 'Rejected' for x in predictions]
+    new_data['Approval_Probability'] = prediction_probs
+    new_data['Approval_Probability_Pct'] = (prediction_probs * 100).round(2)
+    
+    # Save comprehensive results
+    output_path = '/content/drive/MyDrive/LOANAPP_Predictions.csv'
+    new_data.to_csv(output_path, index=False)
+    
+    return True
+
+# Execute the pipeline
+predict_loan_approval()</pre>
+            </div>
+
+            <p><strong>Pipeline Features:</strong></p>
+            <ul style="margin-left: 2rem; margin-bottom: 1rem;">
+                <li><strong>Automated Data Integration:</strong> Seamless connection to Google Sheets for real-time data access</li>
+                <li><strong>Intelligent Preprocessing:</strong> Robust data cleaning and transformation with error handling</li>
+                <li><strong>Probabilistic Scoring:</strong> Detailed approval probabilities, not just binary decisions</li>
+                <li><strong>Comprehensive Output:</strong> Enhanced results with explanatory metrics and insights</li>
+            </ul>
+
+            <p>
+                <a href="https://colab.research.google.com/drive/1sAhj8-EJkGaqAEJHSCOYOLIwdpAONp6A" target="_blank" style="color: var(--secondary); text-decoration: none; font-weight: 600;">
+                    🔗 View Complete Google Colab Implementation
+                </a>
+            </p>
+        </section>
+
+        <!-- Project Deliverables Section -->
+        <section id="deliverables" class="section">
+            <div class="section-header">
+                <span class="section-icon">🎯</span>
+                <h2>Project Deliverables</h2>
+            </div>
+            
+            <p>Our comprehensive loan approval system consists of multiple integrated components, each designed to address specific aspects of the lending process. Below are the key deliverables with direct access links:</p>
+
+            <div class="button-grid" style="margin-top: 2rem;">
+                <a href="https://script.google.com/macros/s/AKfycby2SsZ1k9NDGLgtGwHcbn6EhHlDICunmO-n9LS2GBy1VmtwUA7WYdUmLXMZbMnTsvDtPg/exec" class="access-btn" target="_blank" style="background: var(--success); color: white;">
+                    <span class="btn-icon">📝</span>
+                    <strong>Live Application Form</strong>
+                    <small>Interactive loan application interface</small>
+                </a>
+                
+                <a href="https://docs.google.com/spreadsheets/d/1VGRF8daNSc3RiED0GqIzNjLjt1XLYHT7lux5x83s0Dc/edit?gid=0#gid=0" class="access-btn" target="_blank" style="background: var(--warning); color: white;">
+                    <span class="btn-icon">📊</span>
+                    <strong>Application Database</strong>
+                    <small>Real-time application data storage</small>
+                </a>
+                
+                <a href="https://colab.research.google.com/drive/1sAhj8-EJkGaqAEJHSCOYOLIwdpAONp6A" class="access-btn" target="_blank" style="background: var(--primary); color: white;">
+                    <span class="btn-icon">🤖</span>
+                    <strong>ML Decision Model</strong>
+                    <small>Complete prediction algorithm</small>
+                </a>
+                
+                <a href="https://github.com/jctagbor/loan-system/blob/main/Loan%20Application%20Admin%20Panel10.html" class="access-btn" target="_blank" style="background: var(--secondary); color: white;">
+                    <span class="btn-icon">👨‍💼</span>
+                    <strong>Administrative Panel</strong>
+                    <small>Application review & management</small>
+                </a>
+                
+                <a href="https://github.com/jctagbor/loan-system/blob/main/Admin%20Dashboard.html" class="access-btn" target="_blank" style="background: var(--accent); color: white;">
+                    <span class="btn-icon">📈</span>
+                    <strong>Analytics Dashboard</strong>
+                    <small>Portfolio insights & visualization</small>
+                </a>
+                
+                <a href="documents/Project%20Description%20-%20Master%20WriteUp.pdf" class="access-btn" target="_blank" style="background: var(--dark); color: white;">
+                    <span class="btn-icon">📋</span>
+                    <strong>Complete Documentation</strong>
+                    <small>Comprehensive project write-up</small>
+                </a>
+            </div>
+        </section>
+
+        <!-- Contributors Section -->
+        <section class="section">
+            <div class="section-header">
+                <span class="section-icon">👥</span>
+                <h2>Project Contributors</h2>
+            </div>
+            
+            <p>This project was developed as part of the William & Mary MSBA program by a dedicated team of data science professionals:</p>
+            
+            <div class="feature-list">
+                <div class="feature-item">
+                    <div class="feature-title">John Carl Tagbor</div>
+                    <p>Lead Data Scientist & Project Manager - Model development, system architecture, and project coordination</p>
+                    <a href="https://github.com/jctagbor" target="_blank" style="color: var(--secondary);">github.com/jctagbor</a>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-title">Aria Zand</div>
+                    <p>Frontend Development & UI/UX Design - Application interface and user experience optimization</p>
+                    <a href="https://github.com/ariazand" target="_blank" style="color: var(--secondary);">github.com/ariazand</a>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-title">Cathy Fan</div>
+                    <p>Data Engineering & Pipeline Development - Backend processing and data integration systems</p>
+                    <a href="https://github.com/yihangfan2095" target="_blank" style="color: var(--secondary);">github.com/yihangfan2095</a>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-title">Melissa Parada-Quinatoa</div>
+                    <p>Analytics & Visualization - Dashboard development and business intelligence reporting</p>
+                    <a href="https://github.com/mpquinat" target="_blank" style="color: var(--secondary);">github.com/mpquinat</a>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 Team 15 - William & Mary, MSBA Program</p>
+            <p style="margin-top: 0.5rem; font-size: 0.9rem; opacity: 0.8;">AI-Powered Loan Application & Approval System</p>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add active state to navigation links based on scroll position
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('section[id]');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (scrollY >= (sectionTop - 200)) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.style.borderBottomColor = 'transparent';
+                link.style.backgroundColor = 'transparent';
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.style.borderBottomColor = 'var(--accent)';
+                    link.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
